@@ -56,8 +56,8 @@ class ApiTestCase(BaseTestCase):
         user = "user"
         n = 5
 
-        def send(user, password):
-            smtp_send_email("test1@example.com", "test", "me@example.com", "Hello",
+        def send(user, password, subject="test"):
+            smtp_send_email("test1@example.com", subject, "me@example.com", "Hello",
                             user=user, password=password, port=self.port)
 
         def auth(user, password):
@@ -83,3 +83,12 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(message_count(user, password1), n - 1)
         self.delete("/", headers=auth(user, password1))
         self.assertEquals(message_count(user, password1), 0)
+
+        n_new = 2
+        new_subject = "new subject"
+        for i in range(n_new):
+            send(user, password2, subject=new_subject)
+
+        self.assertEquals(message_count(user, password2), n + n_new)
+        self.delete("/", headers=auth(user, password2), params={"subject": new_subject})
+        self.assertEquals(message_count(user, password2), n)

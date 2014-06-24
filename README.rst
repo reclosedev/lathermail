@@ -127,7 +127,7 @@ Deletes single message
 
 **DELETE /api/0/**
 
-Deletes all messages in inbox
+Deletes all messages in inbox. Also, you can filter deletable messages like in **GET /api/0/**
 
 
 Configuration
