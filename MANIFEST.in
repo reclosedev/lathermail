@@ -1,0 +1,3 @@
+include LICENSE README.rst HISTORY.rst lathermail.conf.example
+include *.py
+recursive-include tests *.py

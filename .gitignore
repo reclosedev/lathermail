@@ -1,0 +1,8 @@
+*.py[co]
+*.idea
+*.sqlite
+build
+_build
+dist
+MANIFEST
+*.egg-info/
