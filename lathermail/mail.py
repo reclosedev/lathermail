@@ -25,6 +25,7 @@ def convert_message_to_dict(to, sender, message, body, user, password):
         "sender": convert_addresses(message["From"])[0],
         "recipients": convert_addresses(message["To"]),
         "subject": _header_to_unicode(message["Subject"]),
+        "read": False,
     }
     return result
 

@@ -93,7 +93,8 @@ Returns single message. Example::
             ],
             "inbox": "inbox",
             "_id": "53a960e3312f9156b7c92c5b",
-            "subject": "Test subject \u0445\u044d\u043b\u043b\u043e\u0443 2"
+            "subject": "Test subject \u0445\u044d\u043b\u043b\u043e\u0443 2",
+            "read": false
         }
     }
 
@@ -109,6 +110,7 @@ Returns messages according to optional filters:
 * `subject_contains` - Any part of message subject
 * `created_at_lt` - Filter messages created before this ISO formatted datetime
 * `created_at_gt` - Filter messages created after this ISO formatted datetime
+* `read` - Return only read emails when `True` or unread when `False`. All emails returned by default
 
 Example::
 

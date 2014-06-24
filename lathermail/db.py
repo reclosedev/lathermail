@@ -29,6 +29,15 @@ def message_handler(*args, **kwargs):
 
 
 def find_messages(password, inbox=None, fields=None, limit=0):
+    messages = list(_iter_messages(password, inbox, fields, limit))
+    if messages:
+        ids = [m["_id"] for m in messages]
+        mongo.db.messages.update({"_id": {"$in": ids}, "read": False},
+                                 {"$set": {"read": True}}, multi=True)
+    return messages
+
+
+def _iter_messages(password, inbox=None, fields=None, limit=0):
     query = _prepare_query(password, inbox, fields)
     for message in mongo.db.messages.find(query).sort("created_at", DESCENDING).limit(limit):
         yield expand_message_fields(message)
@@ -41,7 +50,7 @@ def remove_messages(password, inbox=None, fields=None):
 
 _allowed_query_fields = {
     "_id", "recipients.name", "recipients.address",
-    "sender.name", "sender.address", "subject"
+    "sender.name", "sender.address", "subject", "read",
 }
 
 

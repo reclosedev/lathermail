@@ -56,19 +56,12 @@ class ApiTestCase(BaseTestCase):
         user = "user"
         n = 5
 
-        def send(user, password, subject="test"):
-            smtp_send_email("test1@example.com", subject, "me@example.com", "Hello",
-                            user=user, password=password, port=self.port)
-
-        def auth(user, password):
-            return {"X-Mail-Inbox": user, "X-Mail-Password": password}
-
         def message_count(user, password):
             return self.get("/", headers=auth(user, password)).json["message_count"]
 
         for i in range(n):
-            send(user, password1)
-            send(user, password2)
+            self.send(user, password1)
+            self.send(user, password2)
 
         self.assertEquals(message_count(user, password1), n)
         self.assertEquals(message_count(user, password2), n)
@@ -87,8 +80,28 @@ class ApiTestCase(BaseTestCase):
         n_new = 2
         new_subject = "new subject"
         for i in range(n_new):
-            send(user, password2, subject=new_subject)
+            self.send(user, password2, subject=new_subject)
 
         self.assertEquals(message_count(user, password2), n + n_new)
         self.delete("/", headers=auth(user, password2), params={"subject": new_subject})
         self.assertEquals(message_count(user, password2), n)
+
+    def test_read_flag(self):
+        n_read = 5
+        n_unread = 3
+        subject_read = "read emails"
+        subject_unread = "unread emails"
+
+        for i in range(n_read):
+            self.send(subject=subject_read)
+        for i in range(n_unread):
+            self.send(subject=subject_unread)
+
+        self.assertEquals(self.get("/", {"subject": subject_read}).json["message_count"], n_read)
+        self.assertEquals(self.get("/", {"read": False}).json["message_count"], n_unread)
+        self.assertEquals(self.get("/", {"read": False}).json["message_count"], 0)
+        self.assertEquals(self.get("/").json["message_count"], n_unread + n_read)
+
+
+def auth(user, password):
+    return {"X-Mail-Inbox": user, "X-Mail-Password": password}

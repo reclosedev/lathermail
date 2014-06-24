@@ -84,6 +84,10 @@ class BaseTestCase(unittest.TestCase):
     def delete(self, url, params=None, **kwargs):
         return self.request("delete", url, params, **kwargs)
 
+    def send(self, user=None, password=None, subject="test", body="Hello"):
+        smtp_send_email("test1@example.com", subject, "me@example.com", body,
+                        user=user or self.inbox, password=password or self.password, port=self.port)
+
 
 def _prepare_params(params):
     def convert(v):
