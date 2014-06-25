@@ -21,6 +21,10 @@ Usage::
 
     optional arguments:
       -h, --help            show this help message and exit
+      --mongo-host MONGO_HOST
+                            MongoDB Host (default: 127.0.0.1)
+      --mongo-port MONGO_PORT
+                            MongoDB Host (default: 27017)
       --api-host API_HOST   API Host (default: 127.0.0.1)
       --api-port API_PORT   API port (default: 5000)
       --smtp-host SMTP_HOST

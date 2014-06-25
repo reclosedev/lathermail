@@ -12,6 +12,7 @@ from email.header import Header
 from email import Encoders
 
 import lathermail
+import lathermail.db
 
 
 class InvalidStatus(Exception):
@@ -38,6 +39,7 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         lathermail.app.config["MONGO_DBNAME"] = cls.db_name
+        lathermail.init_app()
         lathermail.db.switch_db(cls.db_name)
         cls.c = lathermail.app.test_client()
         super(BaseTestCase, cls).setUpClass()
