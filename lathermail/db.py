@@ -48,6 +48,10 @@ def remove_messages(password, inbox=None, fields=None):
     return mongo.db.messages.remove(query)["n"]
 
 
+def get_inboxes(password):
+    return mongo.db.messages.find({"password": password}).distinct("inbox")
+
+
 _allowed_query_fields = {
     "_id", "recipients.name", "recipients.address",
     "sender.name", "sender.address", "subject", "read",

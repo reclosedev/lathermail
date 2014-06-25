@@ -51,9 +51,9 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(msg_count({"created_at_gt": now}), 0)
 
     def test_different_boxes_and_deletion(self):
-        password1 = "inbox1"
-        password2 = "inbox2"
-        user = "user"
+        password1 = "pass1"
+        password2 = "pass2"
+        user = "inbox"
         n = 5
 
         def message_count(user, password):
@@ -101,6 +101,15 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(self.get("/messages/", {"read": False}).json["message_count"], n_unread)
         self.assertEquals(self.get("/messages/", {"read": False}).json["message_count"], 0)
         self.assertEquals(self.get("/messages/").json["message_count"], n_unread + n_read)
+
+    def test_get_inboxes(self):
+        inboxes = ["first", "second", "third"]
+        for inbox in inboxes:
+            self.send(inbox)
+        self.send("another_inbox", "another_password")
+        retreived = self.get("/inboxes/", headers=auth(None, self.password)).json["inbox_list"]
+        self.assertEquals(sorted(retreived), sorted(inboxes))
+        self.assertEquals(self.get("/inboxes/", headers=auth(None, "unknown")).json["inbox_count"], 0)
 
 
 def auth(user, password):

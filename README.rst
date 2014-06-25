@@ -41,8 +41,22 @@ API
 
 To request API, you must provide headers:
 
-* `X-Mail-Inbox` - same as SMTP user
 * `X-Mail-Password` - same as SMTP password
+* `X-Mail-Inbox` - same as SMTP user. Optional, work with all inboxes if not specified
+
+**GET /api/0/inboxes/**
+
+Returns list of inboxes for passed `X-Mail-Password`::
+
+    {
+        "inbox_list": [
+            "first",
+            "second",
+            "third"
+        ],
+        "inbox_count": 3
+    }
+
 
 **GET /api/0/messages/<message_id>**
 

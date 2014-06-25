@@ -3,7 +3,7 @@ from flask import Blueprint
 from flask.ext import restful
 from flask.ext.restful import Resource
 
-from .db import find_messages, remove_messages
+from .db import find_messages, remove_messages, get_inboxes
 from .validators import parser
 from .representations import output_json
 
@@ -41,5 +41,13 @@ class Message(Resource):
         return {"error": "Message not found"}, 404
 
 
+class InboxList(Resource):
+    def get(self):
+        args = parser.parse_args()
+        inboxes = get_inboxes(args.password)
+        return {'inbox_list': inboxes, 'inbox_count': len(inboxes)}
+
+
 api.add_resource(MessageList, '/messages/')
 api.add_resource(Message, '/messages/<ObjectId:message_id>')
+api.add_resource(InboxList, '/inboxes/')
