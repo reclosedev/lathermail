@@ -89,6 +89,7 @@ Returns single message. Example::
             "sender_raw": "Me <asdf@exmapl.com>",
             "parts": [
                 {
+                    "index": 0,
                     "body": "you you \u043f\u0440\u0438\u0432\u0435\u0442 2",
                     "is_attachment": false,
                     "charset": "utf-8",
@@ -97,7 +98,8 @@ Returns single message. Example::
                     "size": 16
                 },
                 {
-                    "body": "file content",
+                    "index": 1,
+                    "body": null,
                     "is_attachment": true,
                     "charset": null,
                     "filename": "t\u0430\u0441\u0434est.txt",
@@ -111,6 +113,14 @@ Returns single message. Example::
             "read": false
         }
     }
+
+Attachments in message have `body` = null. To download file, use following method.
+
+
+**GET /api/0/messages/<message_id>/attachments/<attachment_index>**
+
+Returns file from message. Works in browsers.
+
 
 **GET /api/0/messages/**
 

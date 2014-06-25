@@ -30,31 +30,37 @@ def convert_message_to_dict(to, sender, message, body, user, password):
     return result
 
 
-def expand_message_fields(message_info):
+def expand_message_fields(message_info, include_attachment_bodies=False):
     message = email.message_from_string(message_info["message_raw"])
-    message_info["parts"] = list(_iter_parts(message))
+    message_info["parts"] = list(_iter_parts(message, include_attachment_bodies))
     return message_info
 
 
-def _iter_parts(message):
+def _iter_parts(message, include_attachment_bodies):
     parts = [message] if not message.is_multipart() else message.get_payload()
 
-    for part in parts:
-        body = part.get_payload(decode=True)
+    for i, part in enumerate(parts):
+        filename = part.get_filename()
+        is_attachment = filename is not None
+        if not include_attachment_bodies and is_attachment:
+            body = None
+        else:
+            body = part.get_payload(decode=True)
         charset = part.get_content_charset()
         if charset:
             try:
                 body = body.decode(charset)
             except Exception:
                 pass
-        filename = part.get_filename()
+
         yield {
+            "index": i,
             "type": part.get_content_type(),
-            "is_attachment": filename is not None,
+            "is_attachment": is_attachment,
             "filename": _header_to_unicode(filename) if filename else None,
             "charset": charset,
             "body": body,
-            "size": len(body)
+            "size": len(body) if body else 0
         }
 
 

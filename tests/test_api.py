@@ -26,8 +26,8 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(len(msg["parts"]), 2)
         self.assertEquals(msg["parts"][0]["body"], body_fmt.format(n - 1))
         self.assertEquals(msg["parts"][0]["is_attachment"], False)
-        self.assertEquals(msg["parts"][1]["body"], file_content)
         self.assertEquals(msg["parts"][1]["is_attachment"], True)
+        self.assertIsNone(msg["parts"][1]["body"])
 
         def msg_count(params=None):
             return self.get("/messages/", params=params).json["message_count"]
@@ -110,6 +110,17 @@ class ApiTestCase(BaseTestCase):
         retreived = self.get("/inboxes/", headers=auth(None, self.password)).json["inbox_list"]
         self.assertEquals(sorted(retreived), sorted(inboxes))
         self.assertEquals(self.get("/inboxes/", headers=auth(None, "unknown")).json["inbox_count"], 0)
+
+    def test_binary_attach(self):
+        binary_data = "%PDF\x93"
+        smtp_send_email(
+            "test@example.com", "Binary test", u"Test <asdf@exmapl.com>", u"Text body да",
+            user=self.inbox, password=self.password, port=self.port,
+            attachments=[("filename.pd", binary_data)]
+        )
+        msg = self.get("/messages/").json["message_list"][0]
+        self.assertEquals(self.get("/messages/{}/attachments/{}".format(msg["_id"], 1),
+                                   parse_json=False).data, binary_data)
 
 
 def auth(user, password):

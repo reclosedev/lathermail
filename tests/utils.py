@@ -55,7 +55,7 @@ class BaseTestCase(unittest.TestCase):
         with lathermail.app.app_context():
             mongo.cx.drop_database(self.db_name)
 
-    def request(self, method, url, params=None, raise_errors=True, **kwargs):
+    def request(self, method, url, params=None, raise_errors=True, parse_json=True, **kwargs):
         method = method.lower()
         new_kwargs = {"headers": {"X-Mail-Inbox": self.inbox, "X-Mail-Password": self.password}}
         new_kwargs.update(kwargs)
@@ -68,12 +68,13 @@ class BaseTestCase(unittest.TestCase):
                 new_kwargs["data"] = params
 
         rv = func(self.prefix + url, **new_kwargs)
-        try:
-            rv.json = json.loads(rv.data)
-        except ValueError as e:
-            if rv.status_code != httplib.NO_CONTENT:
-                print "JSON decode error: {}, data:\n{}".format(e, rv.data)
-            rv.json = None
+        if parse_json:
+            try:
+                rv.json = json.loads(rv.data)
+            except ValueError as e:
+                if rv.status_code != httplib.NO_CONTENT:
+                    print "JSON decode error: {}, data:\n{}".format(e, rv.data)
+                rv.json = None
         if raise_errors and rv.status_code >= 400:
             raise InvalidStatus(rv)
         return rv
