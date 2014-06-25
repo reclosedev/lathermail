@@ -41,5 +41,5 @@ class Message(Resource):
         return {"error": "Message not found"}, 404
 
 
-api.add_resource(MessageList, '/')
-api.add_resource(Message, '/<ObjectId:message_id>')
+api.add_resource(MessageList, '/messages/')
+api.add_resource(Message, '/messages/<ObjectId:message_id>')

@@ -19,7 +19,7 @@ class ApiTestCase(BaseTestCase):
                 user=self.inbox, password=self.password, port=self.port, emails=emails,
                 attachments=[(u"tасдest.txt", file_content)]
             )
-        res = self.get("/").json
+        res = self.get("/messages/").json
         self.assertEquals(res["message_count"], n)
 
         msg = res["message_list"][0]
@@ -30,7 +30,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(msg["parts"][1]["is_attachment"], True)
 
         def msg_count(params=None):
-            return self.get("/", params=params).json["message_count"]
+            return self.get("/messages/", params=params).json["message_count"]
 
         self.assertEquals(msg_count({"subject": subject_fmt.format(0)}), 1)
         self.assertEquals(msg_count({"subject_contains": "Test"}), n)
@@ -57,7 +57,7 @@ class ApiTestCase(BaseTestCase):
         n = 5
 
         def message_count(user, password):
-            return self.get("/", headers=auth(user, password)).json["message_count"]
+            return self.get("/messages/", headers=auth(user, password)).json["message_count"]
 
         for i in range(n):
             self.send(user, password1)
@@ -66,15 +66,15 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(message_count(user, password1), n)
         self.assertEquals(message_count(user, password2), n)
 
-        one_message = self.get("/", headers=auth(user, password1)).json["message_list"][0]
-        self.delete("/{}".format(one_message["_id"]), headers=auth(user, password1))
+        one_message = self.get("/messages/", headers=auth(user, password1)).json["message_list"][0]
+        self.delete("/messages/{}".format(one_message["_id"]), headers=auth(user, password1))
         self.assertEquals(
-            self.delete("/{}".format(one_message["_id"]),
+            self.delete("/messages/{}".format(one_message["_id"]),
                         headers=auth(user, password1), raise_errors=False).status_code,
             404
         )
         self.assertEquals(message_count(user, password1), n - 1)
-        self.delete("/", headers=auth(user, password1))
+        self.delete("/messages/", headers=auth(user, password1))
         self.assertEquals(message_count(user, password1), 0)
 
         n_new = 2
@@ -83,7 +83,7 @@ class ApiTestCase(BaseTestCase):
             self.send(user, password2, subject=new_subject)
 
         self.assertEquals(message_count(user, password2), n + n_new)
-        self.delete("/", headers=auth(user, password2), params={"subject": new_subject})
+        self.delete("/messages/", headers=auth(user, password2), params={"subject": new_subject})
         self.assertEquals(message_count(user, password2), n)
 
     def test_read_flag(self):
@@ -97,10 +97,10 @@ class ApiTestCase(BaseTestCase):
         for i in range(n_unread):
             self.send(subject=subject_unread)
 
-        self.assertEquals(self.get("/", {"subject": subject_read}).json["message_count"], n_read)
-        self.assertEquals(self.get("/", {"read": False}).json["message_count"], n_unread)
-        self.assertEquals(self.get("/", {"read": False}).json["message_count"], 0)
-        self.assertEquals(self.get("/").json["message_count"], n_unread + n_read)
+        self.assertEquals(self.get("/messages/", {"subject": subject_read}).json["message_count"], n_read)
+        self.assertEquals(self.get("/messages/", {"read": False}).json["message_count"], n_unread)
+        self.assertEquals(self.get("/messages/", {"read": False}).json["message_count"], 0)
+        self.assertEquals(self.get("/messages/").json["message_count"], n_unread + n_read)
 
 
 def auth(user, password):

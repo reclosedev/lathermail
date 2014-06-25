@@ -44,7 +44,7 @@ To request API, you must provide headers:
 * `X-Mail-Inbox` - same as SMTP user
 * `X-Mail-Password` - same as SMTP password
 
-**GET /api/0/<message_id>**
+**GET /api/0/messages/<message_id>**
 
 Returns single message. Example::
 
@@ -98,7 +98,7 @@ Returns single message. Example::
         }
     }
 
-**GET /api/0/**
+**GET /api/0/messages/**
 
 Returns messages according to optional filters:
 
@@ -123,11 +123,11 @@ Example::
         ]
     }
 
-**DELETE /api/0/<message_id>**
+**DELETE /api/0/messages/<message_id>**
 
 Deletes single message
 
-**DELETE /api/0/**
+**DELETE /api/0/messages/**
 
 Deletes all messages in inbox. Also, you can filter deletable messages like in **GET /api/0/**
 
