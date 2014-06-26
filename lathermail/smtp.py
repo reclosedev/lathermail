@@ -58,7 +58,7 @@ class InboxServer(smtpd.SMTPServer, object):
             self._channel = SMTPChannelWithAuth(self, conn, addr)
 
     def process_message(self, peer, mailfrom, rcpttos, data):
-        log.info("Processing message from {0}, to {1}".format(mailfrom, rcpttos))
+        log.info("Storing message to inbox: '{0}' (from: {1}, to: {2})".format(self._channel.user, mailfrom, rcpttos))
         message = email.message_from_string(data)
         return self._handler(to=rcpttos, sender=mailfrom, message=message, body=data,
                              user=self._channel.user, password=self._channel.password)

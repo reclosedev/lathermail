@@ -9,7 +9,7 @@ app.config.from_object("lathermail.default_settings")
 app.config.from_envvar("LATHERMAIL_SETTINGS", silent=True)
 app.config.from_pyfile("lathermail.conf", silent=True)
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)-16s:%(asctime)-s:%(message)s")
 
 from . import db
 from .db import mongo
