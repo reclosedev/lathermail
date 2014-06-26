@@ -4,6 +4,8 @@ import argparse
 from threading import Thread
 
 from lathermail import app, init_app
+from lathermail.smtp import serve_smtp
+from lathermail.db import message_handler
 
 
 def main():
@@ -19,8 +21,6 @@ def main():
     app.config["MONGO_PORT"] = args.mongo_port
     init_app()
 
-    from lathermail.smtp import serve_smtp
-    from lathermail.db import message_handler
     t = Thread(target=serve_smtp, kwargs=dict(handler=message_handler,
                                               host=args.smtp_host, port=args.smtp_port))
     t.daemon = True

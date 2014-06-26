@@ -10,7 +10,7 @@ from . import app
 from .mail import convert_message_to_dict, expand_message_fields
 
 log = logging.getLogger(__name__)
-mongo = PyMongo(app)
+mongo = PyMongo()
 
 
 def switch_db(name):
