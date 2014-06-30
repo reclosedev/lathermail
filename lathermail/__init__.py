@@ -14,8 +14,10 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)-16s:%(asct
 from . import db
 from .db import mongo
 from .api import api_bp
+from .web import static_bp
 
 
 def init_app():
     mongo.init_app(app)
     app.register_blueprint(api_bp)
+    app.register_blueprint(static_bp)

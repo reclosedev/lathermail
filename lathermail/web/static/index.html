@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html ng-app="lathermailApp">
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Lathermail</title>
+  <link rel="stylesheet" type="text/css"
+        href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css"/>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular-route.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.7.1/angular-moment.min.js"></script>
+  <script src="js/lathermail.js"></script>
+  <style>
+    body {
+      padding-top: 50px;
+      padding-left: 30px;
+    }
+
+    .title {
+      font-weight: bold;
+      display: block
+    }
+    .top5 { margin-top:5px; }
+    .top7 { margin-top:7px; }
+    .top10 { margin-top:10px; }
+    .with-vscroll {
+      overflow-y: scroll;
+    }
+    .pointer {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body ng-controller="lathermailCtrl">
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-6">
+      <form class="form-inline" role="form">
+        <label for="inbox">Inbox:</label> <input type="text" ng-model="inbox" class="form-control" id="inbox">
+        <label for="password">Password:</label> <input type="text" ng-model="password" class="form-control" id="password">
+        <button ng-click="refreshMessages()" class="btn">Refresh</button>
+      </form>
+    </div>
+  </div>
+  <div class="row top10">
+    <!--messages list-->
+    <div class="col-md-3">
+      <input type="text" ng-model="query" placeholder="Filter messages..." class="form-control">
+      <div class="with-vscroll top5" full-height>
+        <table class="table table-bordered table-hover table-condensed">
+          <tbody>
+          <tr ng-repeat="message in messages | filter:query"
+              ng-class="{'info': isActiveMessage(message)}">
+            <td ng-click="go('/messages/' + message._id + '/' + params.currentTab)" class="pointer">
+              <strong class="title">{{ message.subject }}</strong>
+              To: <recipients recipients="message.recipients"></recipients>
+              <p class="text-right">
+                <small class="text-muted" am-time-ago="message.created_at"
+                       title="{{message.created_at}}"></small>
+              </p>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!--message detail-->
+    <div class="col-md-9" ng-show="selectedMessage">
+      <h2>{{ selectedMessage.subject }}</h2>
+      <table class="table-condensed">
+        <tbody>
+        <tr>
+          <td>From:</td>
+          <td>{{ selectedMessage.sender.name }} &lt;{{ selectedMessage.sender.address }}&gt;</td>
+        </tr>
+        <tr>
+          <td>To:</td>
+          <td><recipients recipients="selectedMessage.recipients"></recipients></td>
+        </tr>
+        <tr>
+          <td>Created:</td>
+          <td>
+            <span title="{{selectedMessage.created_at}}">
+              {{ selectedMessage.created_at | date:'medium' }} (<span am-time-ago="selectedMessage.created_at"></span>)
+            </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <ul class="nav nav-tabs" role="tablist" ng-controller="lathermailDetailCtrl">
+        <li ng-repeat="tab in tabs"
+            ng-class="{active: isActiveTab(tab.url)}">
+          <a ng-href="#/messages/{{selectedMessage._id}}/{{tab.url}}">{{tab.title(selectedMessage)}}</a>
+        </li>
+      </ul>
+      <div ng-view class="top10"></div>
+
+      <!--Tab templates-->
+      <script type="text/ng-template" id="message.text.html">
+        <div>{{ selectedMessage.parts[0].body }}</div>
+      </script>
+      <script type="text/ng-template" id="message.raw.html">
+        <pre>{{ selectedMessage.message_raw }}</pre>
+      </script>
+      <script type="text/ng-template" id="message.attachments.html">
+        <span ng-show="!selectedMessage.attachmentCount">No files</span>
+        <table class="table table-condensed" ng-show="selectedMessage.attachmentCount">
+          <tbody>
+          <tr>
+            <td>Filename</td>
+            <td>Content type</td>
+          </tr>
+          <tr ng-repeat="part in selectedMessage.parts" ng-show="part.is_attachment">
+            <td><a ng-href="/api/0/messages/{{selectedMessage._id}}/attachments/{{part.index}}">{{part.filename}}</a></td>
+            <td>{{part.type}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </script>
+    </div>
+  </div>
+</div>
+</body>
+</html>
