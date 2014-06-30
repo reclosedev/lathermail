@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import datetime
 from tests.utils import BaseTestCase, smtp_send_email, prepare_send_to_field
+from lathermail.utils import utcnow
 
 
 class ApiTestCase(BaseTestCase):
@@ -36,7 +36,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(msg_count({"subject_contains": "Test"}), n)
         self.assertEquals(msg_count({"subject_contains": "no such message"}), 0)
 
-        before_send = datetime.datetime.now().isoformat()
+        before_send = utcnow()
         smtp_send_email("test1@example.com", "test", "me@example.com", "Hello",
                         user=self.inbox, password=self.password, port=self.port)
 
@@ -44,7 +44,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(msg_count({"recipients.name": "Rcpt1"}), n)
 
         self.assertEquals(msg_count({"recipients.address": "no_such_email@example.com"}), 0)
-        now = datetime.datetime.now().isoformat()
+        now = utcnow()
         self.assertEquals(msg_count({"created_at_lt": before_send}), n)
         self.assertEquals(msg_count({"created_at_gt": before_send}), 1)
         self.assertEquals(msg_count({"created_at_lt": now}), n + 1)
