@@ -44,9 +44,8 @@ class Message(Resource):
 
 class Attachment(Resource):
     def get(self, message_id, attachment_index):
-        args = parser.parse_args()
-        args["_id"] = message_id
-        messages = list(find_messages(args.password, args.inbox, args, limit=1, include_attachment_bodies=True))
+        args = {"_id": message_id}
+        messages = list(find_messages(None, fields=args, limit=1, include_attachment_bodies=True))
         if not messages:
             return {"error": "Message not found"}, 404
 

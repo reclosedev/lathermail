@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
-import datetime
 import logging
 
 from flask.ext.pymongo import PyMongo, DESCENDING
 
 from . import app
 from .mail import convert_message_to_dict, expand_message_fields
+from .utils import utcnow
 
 log = logging.getLogger(__name__)
 mongo = PyMongo()
@@ -23,7 +23,7 @@ def switch_db(name):
 
 def message_handler(*args, **kwargs):
     msg = convert_message_to_dict(*args, **kwargs)
-    msg["created_at"] = datetime.datetime.now()
+    msg["created_at"] = utcnow()
     with app.app_context():
         mongo.db.messages.insert(msg)
 
@@ -65,8 +65,9 @@ def _prepare_query(password, inbox=None, fields=None):
             if field in _allowed_query_fields and value is not None:
                 query[field] = value
 
-    query["password"] = password
-    if inbox:
+    if password is not None:
+        query["password"] = password
+    if inbox is not None:
         query["inbox"] = inbox
     if fields.get("created_at_gt") is not None:
         query["created_at"] = {"$gt": fields["created_at_gt"]}
