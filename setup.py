@@ -2,10 +2,11 @@ import os
 from setuptools import setup, find_packages
 
 install_requires = [
-    "Flask",
-    "Flask-RESTful",
-    "Flask-PyMongo",
-    "python-dateutil",
+    "Flask==0.10.1",
+    "Flask-RESTful==0.2.12",
+    "Flask-PyMongo==0.3.0",
+    "pymongo==2.7.1",
+    "python-dateutil==2.2",
 ]
 
 
