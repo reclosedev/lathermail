@@ -12,12 +12,12 @@ app.config.from_pyfile("lathermail.conf", silent=True)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)-16s:%(asctime)-s:%(message)s")
 
 from . import db
-from .db import mongo
+from .db import init_app_for_db
 from .api import api_bp
 from .web import static_bp
 
 
 def init_app():
-    mongo.init_app(app)
+    init_app_for_db(app)
     app.register_blueprint(api_bp)
     app.register_blueprint(static_bp)

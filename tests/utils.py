@@ -52,10 +52,10 @@ class BaseTestCase(unittest.TestCase):
         cls.server.stop()
 
     def tearDown(self):
-        from lathermail.db import mongo
+        from lathermail.db import drop_database
 
         with lathermail.app.app_context():
-            mongo.cx.drop_database(self.db_name)
+            drop_database(self.db_name)
 
     def request(self, method, url, params=None, raise_errors=True, parse_json=True, **kwargs):
         method = method.lower()
