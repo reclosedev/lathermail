@@ -1,0 +1,22 @@
+language: python
+sudo: false
+
+python:
+  - "2.7"
+
+services:
+  - mongodb
+
+env:
+  - LATHERMAIL_TEST_DB_TYPE=sqlite
+  - LATHERMAIL_TEST_DB_TYPE=mongo
+
+install:
+  - python setup.py develop
+  - pip install 'pytest>=2.8,<3' 'pytest-cov>=2.0,<2.2'
+  - pip install coveralls
+
+script: py.test -s -v tests --cov lathermail
+
+after_success:
+  coveralls
