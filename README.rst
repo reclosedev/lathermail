@@ -4,7 +4,7 @@ lathermail
 SMTP Server with API for email testing inspired by `mailtrap <https://mailtrap.io/>`_ and
 `maildump <https://github.com/ThiefMaster/maildump>`_
 
-Requires MongoDB.
+Can store messages in SQL DB (sqlite, or any SQLAlchemy supported DB) or MongoDB.
 
 
 Usage::
@@ -21,10 +21,9 @@ Usage::
 
     optional arguments:
       -h, --help            show this help message and exit
-      --mongo-host MONGO_HOST
-                            MongoDB Host (default: 127.0.0.1)
-      --mongo-port MONGO_PORT
-                            MongoDB Host (default: 27017)
+      --db-uri DB_URI       DB URI, e.g. mongodb://localhost/lathermail,
+                            sqlite:////tmp/my.db (default:
+                            sqlite:///~/.lathermail.db)
       --api-host API_HOST   API Host (default: 127.0.0.1)
       --api-port API_PORT   API port (default: 5000)
       --smtp-host SMTP_HOST

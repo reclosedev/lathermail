@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import tempfile
 import time
 import socket
 import httplib
@@ -37,20 +39,32 @@ class BaseTestCase(unittest.TestCase):
     server = None
     db_name = "lathermail_test_db"
     prefix = "/api/0"
+    _db_fd = None
+    _db_file = None
 
     @classmethod
     def setUpClass(cls):
-        lathermail.app.config["MONGO_DBNAME"] = cls.db_name
+        conf = lathermail.app.config
+
+        if os.getenv("LATHERMAIL_TEST_DB_TYPE", "sqlite") == "mongo":
+            conf["DB_URI"] = conf["SQLALCHEMY_DATABASE_URI"] = "mongodb://localhost/%s" % cls.db_name
+        else:
+            cls._db_fd, cls._db_file = tempfile.mkstemp()
+            conf["DB_URI"] = conf["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % cls._db_file
+
         lathermail.init_app()
         cls.c = lathermail.app.test_client()
         super(BaseTestCase, cls).setUpClass()
-        cls.server = SmtpServerRunner()
+        cls.server = SmtpServerRunner(cls.db_name)
         cls.server.start(cls.port)
 
     @classmethod
     def tearDownClass(cls):
         super(BaseTestCase, cls).tearDownClass()
         cls.server.stop()
+        if cls._db_fd is not None:
+            os.close(cls._db_fd)
+            os.unlink(cls._db_file)
 
     def setUp(self):
         lathermail.db.switch_db(self.db_name)
@@ -146,15 +160,20 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
 
 class SmtpServerRunner(object):
 
-    def __init__(self):
+    def __init__(self, db_name):
         self._process = None
+        self.db_name = db_name
 
     def start(self, port=2025):
         from lathermail.db import message_handler
         from lathermail.smtp import serve_smtp
         from multiprocessing import Process
 
-        p = Process(target=serve_smtp, kwargs=dict(handler=message_handler, port=port))
+        def wrapper(**kwargs):
+            lathermail.db.switch_db(self.db_name)
+            serve_smtp(**kwargs)
+
+        p = Process(target=wrapper, kwargs=dict(handler=message_handler, port=port))
         p.daemon = True
         p.start()
         self._process = p

@@ -18,8 +18,8 @@ def read(fname):
 setup(
     name="lathermail",
     version="0.0.1",
-    author="ASD Technologies",
-    license="Private",
+    author="Roman Haritonov",
+    license="MIT",
     packages=find_packages("."),
     install_requires=install_requires,
     entry_points={

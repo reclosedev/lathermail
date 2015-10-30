@@ -14,31 +14,30 @@ from ..utils import utcnow
 
 
 log = logging.getLogger(__name__)
-db_path = "/tmp/tst.db"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % db_path
 db = SQLAlchemy(app)
+# logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 
 class Message(db.Model):
     __tablename__ = 'messages'
     _id = db.Column(db.String, primary_key=True)
-    inbox = db.Column(db.String)
-    password = db.Column(db.String)
+    inbox = db.Column(db.String, index=True)
+    password = db.Column(db.String, index=True)
     message_raw = db.Column(db.String)
     sender_raw = db.Column(db.String)
     recipients_raw = db.Column(db.String)
-    subject = db.Column(db.String)
-    sender_name = db.Column(db.String)
-    sender_address = db.Column(db.String)
-    created_at = db.Column(db.DateTime())
+    subject = db.Column(db.String, index=True)
+    sender_name = db.Column(db.String, index=True)
+    sender_address = db.Column(db.String, index=True)
+    created_at = db.Column(db.DateTime(), index=True)
     read = db.Column(db.Boolean)
 
 
 class Recipient(db.Model):
     __tablename__ = 'recipients'
-    name = db.Column(db.String, primary_key=True)
-    address = db.Column(db.String, primary_key=True)
-    message_id = db.Column(db.String, db.ForeignKey('messages._id'), primary_key=True)
+    name = db.Column(db.String, primary_key=True, index=True)
+    address = db.Column(db.String, primary_key=True, index=True)
+    message_id = db.Column(db.String, db.ForeignKey('messages._id', ondelete="CASCADE"), primary_key=True, index=True)
     message = db.relationship("Message", backref="recipients")
 
 
@@ -46,7 +45,15 @@ _message_fields = [column.name for column in Message.__table__.columns]
 
 
 def init_app_for_db(application):
+    db.init_app(application)
     application.url_map.converters['ObjectId'] = UnicodeConverter
+
+    if application.config["DB_URI"].startswith("sqlite") and application.config.get("SQLITE_FAST_SAVE"):
+        @event.listens_for(db.engine, "connect")
+        def _on_engine_connect(dbapi_connection, connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA synchronous = 0")
+            cursor.close()
 
 
 def message_handler(*args, **kwargs):
@@ -92,7 +99,6 @@ def remove_messages(password, inbox=None, fields=None):
 
 def _iter_messages(password, inbox=None, fields=None, limit=0, include_attachment_bodies=False):
     query = _prepare_sql_query(password, inbox, fields, limit=limit)
-
     for message in query.all():
         message = _convert_sa_message_to_dict(message)
         yield expand_message_fields(message, include_attachment_bodies)
@@ -156,10 +162,3 @@ def switch_db(name):
 def _create_tables():
     log.info("Ensuring DB has tables and indexes")
     db.create_all()
-
-
-@event.listens_for(db.engine, "connect")
-def _on_engine_connect(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA synchronous = 0")
-    cursor.close()
