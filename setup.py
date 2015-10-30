@@ -20,6 +20,7 @@ setup(
     url="https://github.com/reclosedev/lathermail/",
     version="0.1.3",
     author="Roman Haritonov",
+    description="SMTP Server with API for email testing inspired by mailtrap and maildump",
     author_email="reclosedev@gmail.com",
     license="MIT",
     packages=find_packages("."),
