@@ -18,7 +18,7 @@ def read(fname):
 setup(
     name="lathermail",
     url="https://github.com/reclosedev/lathermail/",
-    version="0.1.1",
+    version="0.1.3",
     author="Roman Haritonov",
     author_email="reclosedev@gmail.com",
     license="MIT",
@@ -27,7 +27,7 @@ setup(
     entry_points={
         'console_scripts':
             [
-                'lathermail = run_all:main',
+                'lathermail = lathermail.run_all:main',
             ]
     },
     classifiers=[
