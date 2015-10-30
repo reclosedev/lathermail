@@ -18,8 +18,10 @@ def main():
     parser.add_argument("--api-port", default=app.config["API_PORT"], type=int, help="API port")
     parser.add_argument("--smtp-host", default=app.config["SMTP_HOST"], help="SMTP host")
     parser.add_argument("--smtp-port", default=app.config["SMTP_PORT"], type=int, help="SMTP port")
+    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     args = parser.parse_args()
     app.config["DB_URI"] = args.db_uri
+    app.config["DEBUG_MODE"] = args.debug
     init_app()
 
     t = Thread(target=serve_smtp, kwargs=dict(handler=message_handler,

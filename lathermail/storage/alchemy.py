@@ -15,7 +15,6 @@ from ..utils import utcnow
 
 log = logging.getLogger(__name__)
 db = SQLAlchemy(app)
-# logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 
 class Message(db.Model):
@@ -45,6 +44,8 @@ _message_fields = [column.name for column in Message.__table__.columns]
 
 
 def init_app_for_db(application):
+    if app.config.get("DEBUG_MODE"):
+        logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
     db.init_app(application)
     application.url_map.converters['ObjectId'] = UnicodeConverter
 
