@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import time
+import socket
 import httplib
 import unittest
 import smtplib
@@ -40,7 +42,6 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls):
         lathermail.app.config["MONGO_DBNAME"] = cls.db_name
         lathermail.init_app()
-        lathermail.db.switch_db(cls.db_name)
         cls.c = lathermail.app.test_client()
         super(BaseTestCase, cls).setUpClass()
         cls.server = SmtpServerRunner()
@@ -50,6 +51,10 @@ class BaseTestCase(unittest.TestCase):
     def tearDownClass(cls):
         super(BaseTestCase, cls).tearDownClass()
         cls.server.stop()
+
+    def setUp(self):
+        lathermail.db.switch_db(self.db_name)
+        super(BaseTestCase, self).setUp()
 
     def tearDown(self):
         from lathermail.db import drop_database
@@ -159,13 +164,15 @@ class SmtpServerRunner(object):
         self._process.terminate()
 
     def wait_start(self, port):
-        import socket
-
+        timeout = 0.1
+        host_port = ("127.0.0.1", port)
         for i in range(10):
             try:
-                sock = socket.create_connection(("127.0.0.1", port), timeout=0.1)
+                sock = socket.create_connection(host_port, timeout=timeout)
             except Exception:
-                pass
+                time.sleep(timeout)
+                continue
             else:
                 sock.close()
-                break
+                return
+        raise Exception("Can't connect to %s" % str(host_port))
