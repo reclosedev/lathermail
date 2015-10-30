@@ -1,5 +1,6 @@
+.coverage
 *.py[co]
-*.idea
+.idea
 *.sqlite
 build
 _build

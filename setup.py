@@ -17,8 +17,10 @@ def read(fname):
 
 setup(
     name="lathermail",
+    url="https://github.com/reclosedev/lathermail/",
     version="0.0.1",
     author="Roman Haritonov",
+    author_email="reclosedev@gmail.com",
     license="MIT",
     packages=find_packages("."),
     install_requires=install_requires,
@@ -29,10 +31,9 @@ setup(
             ]
     },
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
-        "License :: Other/Proprietary License",
-        "Operating System :: Unix",
+        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 2.7",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Server",
     ],
