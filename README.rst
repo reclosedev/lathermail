@@ -4,20 +4,19 @@ lathermail
 SMTP Server with API for email testing inspired by `mailtrap <https://mailtrap.io/>`_ and
 `maildump <https://github.com/ThiefMaster/maildump>`_
 
-Can store messages in SQL DB (sqlite, or any SQLAlchemy supported DB) or MongoDB.
+Can store messages in MongoDB or any SQLAlchemy supported DB (e.g., sqlite)
 
 
 Usage::
 
-    $ git clone ...
-    $ cd lathermail
-    $ virtualenv venv
+    $ virtualenv venv  # or mkvirutalenv lathermail
     $ . venv/bin/activate
-    $ python setup.py develop
+    $ pip install lathermail
     $ lathermail --help
 
-    usage: lathermail [-h] [--api-host API_HOST] [--api-port API_PORT]
-                      [--smtp-host SMTP_HOST] [--smtp-port SMTP_PORT]
+    usage: lathermail [-h] [--db-uri DB_URI] [--api-host API_HOST]
+                      [--api-port API_PORT] [--smtp-host SMTP_HOST]
+                      [--smtp-port SMTP_PORT]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -44,12 +43,12 @@ API
 
 To request API, you must provide headers:
 
-* `X-Mail-Password` - same as SMTP password
-* `X-Mail-Inbox` - same as SMTP user. Optional, work with all inboxes if not specified
+* ``X-Mail-Password`` - same as SMTP password
+* ``X-Mail-Inbox`` - same as SMTP user. Optional, work with all inboxes if not specified
 
 **GET /api/0/inboxes/**
 
-Returns list of inboxes for passed `X-Mail-Password`::
+Returns list of inboxes for passed ``X-Mail-Password``::
 
     {
         "inbox_list": [
@@ -117,7 +116,7 @@ Returns single message. Example::
         }
     }
 
-Attachments in message have `body` = null. To download file, use following method.
+Attachments in message have ``body`` = null. To download file, use following method.
 
 
 **GET /api/0/messages/<message_id>/attachments/<attachment_index>**

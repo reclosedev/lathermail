@@ -18,7 +18,7 @@ def read(fname):
 setup(
     name="lathermail",
     url="https://github.com/reclosedev/lathermail/",
-    version="0.0.1",
+    version="0.1.1",
     author="Roman Haritonov",
     author_email="reclosedev@gmail.com",
     license="MIT",
