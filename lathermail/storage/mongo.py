@@ -5,9 +5,11 @@ import logging
 
 from flask.ext.pymongo import PyMongo, DESCENDING
 
+from . import ALLOWED_QUERY_FIELDS
 from .. import app
 from ..mail import convert_message_to_dict, expand_message_fields
 from ..utils import utcnow
+
 
 log = logging.getLogger(__name__)
 mongo = PyMongo()
@@ -56,12 +58,6 @@ def get_inboxes(password):
     return mongo.db.messages.find({"password": password}).distinct("inbox")
 
 
-_allowed_query_fields = {
-    "_id", "recipients.name", "recipients.address",
-    "sender.name", "sender.address", "subject", "read",
-}
-
-
 def _prepare_query(password, inbox=None, fields=None):
     query = {}
     if password is not None:
@@ -71,7 +67,7 @@ def _prepare_query(password, inbox=None, fields=None):
 
     if fields:
         for field, value in fields.items():
-            if field in _allowed_query_fields and value is not None:
+            if field in ALLOWED_QUERY_FIELDS and value is not None:
                 query[field] = value
 
         if fields.get("created_at_gt") is not None:
@@ -87,7 +83,7 @@ def _prepare_query(password, inbox=None, fields=None):
 @app.before_first_request
 def _ensure_index():
     log.info("Ensuring DB has indexes")
-    for field in list(_allowed_query_fields) + ["created_at"]:
+    for field in list(ALLOWED_QUERY_FIELDS) + ["created_at"]:
         mongo.db.messages.ensure_index(field)
 
 

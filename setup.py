@@ -7,6 +7,8 @@ install_requires = [
     "Flask-PyMongo==0.3.0",
     "pymongo==2.7.1",
     "python-dateutil==2.2",
+    "SQLAlchemy==1.0.9",
+    "Flask-SQLAlchemy==2.1",
 ]
 
 
