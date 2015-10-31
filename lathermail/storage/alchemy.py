@@ -10,7 +10,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from . import ALLOWED_QUERY_FIELDS
 from .. import app
 from ..mail import convert_message_to_dict, expand_message_fields
-from ..utils import utcnow
+from ..utils import utcnow, as_utc
 
 
 log = logging.getLogger(__name__)
@@ -109,6 +109,7 @@ def _convert_sa_message_to_dict(message):
     result = dict((name, getattr(message, name)) for name in _message_fields)
     result["recipients"] = [{"name": rcpt.name, "address": rcpt.address} for rcpt in message.recipients]
     result["sender"] = {"name": result.pop("sender_name"), "address": result.pop("sender_address")}
+    result["created_at"] = as_utc(result["created_at"])
     return result
 
 
