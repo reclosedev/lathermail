@@ -5,12 +5,15 @@
   <title>Lathermail</title>
   <link rel="stylesheet" type="text/css"
         href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css"/>
+
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular-route.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.7.0/moment.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.7.1/angular-moment.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.9/ngStorage.min.js"></script>
   <script src="js/lathermail.js"></script>
+
   <style>
     body {
       padding-top: 50px;
@@ -38,8 +41,8 @@
   <div class="row">
     <div class="col-md-6">
       <form class="form-inline" role="form">
-        <label for="inbox">Inbox:</label> <input type="text" ng-model="inbox" class="form-control" id="inbox">
-        <label for="password">Password:</label> <input type="text" ng-model="password" class="form-control" id="password">
+        <label for="inbox">Inbox:</label> <input type="text" ng-model="$storage.inbox" class="form-control" id="inbox">
+        <label for="password">Password:</label> <input type="text" ng-model="$storage.password" class="form-control" id="password">
         <button ng-click="refreshMessages()" class="btn">Refresh</button>
       </form>
     </div>
@@ -51,7 +54,7 @@
       <div class="with-vscroll top5" full-height>
         <table class="table table-bordered table-hover table-condensed">
           <tbody>
-          <tr ng-repeat="message in messages | filter:query"
+          <tr ng-repeat="message in messages | filter:query track by message._id "
               ng-class="{'info': isActiveMessage(message)}">
             <td ng-click="go('/messages/' + message._id + '/' + params.currentTab)" class="pointer">
               <strong class="title">{{ message.subject }}</strong>

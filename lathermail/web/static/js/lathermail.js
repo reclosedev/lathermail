@@ -1,4 +1,4 @@
-var lathermailApp = angular.module('lathermailApp', ['ngRoute', 'angularMoment'])
+var lathermailApp = angular.module('lathermailApp', ['ngRoute', 'angularMoment', 'ngStorage'])
 
 
 .config(['$routeProvider', '$locationProvider',
@@ -24,9 +24,11 @@ var lathermailApp = angular.module('lathermailApp', ['ngRoute', 'angularMoment']
 }]);
 
 
-lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams, $location) {
-  $scope.inbox = "inbox";
-  $scope.password = "password";
+lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams, $location, $localStorage) {
+  $scope.$storage = $localStorage.$default({
+    inbox: "inbox",
+    password: "password"
+  });
   $scope.query = "";
   $scope.params = $routeParams;
   $scope.tabs = [
@@ -52,7 +54,10 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
   $scope.selectedMessage = null;
 
   $scope.refreshMessages = function () {
-    $http.defaults.headers.common = {"X-Mail-Inbox": $scope.inbox, "X-Mail-Password": $scope.password};
+    $http.defaults.headers.common = {
+      "X-Mail-Inbox": $scope.$storage.inbox,
+      "X-Mail-Password": $scope.$storage.password
+    };
     $http.get("/api/0/messages/").then(function (resp) {
       $scope.messages = resp.data.message_list;
       $scope.messageById  = {};
