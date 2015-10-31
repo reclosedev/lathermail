@@ -107,7 +107,8 @@ def _iter_messages(password, inbox=None, fields=None, limit=0, include_attachmen
 
 def _convert_sa_message_to_dict(message):
     result = dict((name, getattr(message, name)) for name in _message_fields)
-    result["recipients"] = [{"name": rcpt.name, "address": rcpt.name} for rcpt in message.recipients]
+    result["recipients"] = [{"name": rcpt.name, "address": rcpt.address} for rcpt in message.recipients]
+    result["sender"] = {"name": result.pop("sender_name"), "address": result.pop("sender_address")}
     return result
 
 
