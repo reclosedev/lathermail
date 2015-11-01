@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import tempfile
 import time
 import socket
 import httplib
@@ -8,6 +7,7 @@ import unittest
 import smtplib
 import json
 import urllib
+from threading import Thread
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -39,8 +39,6 @@ class BaseTestCase(unittest.TestCase):
     server = None
     db_name = "lathermail_test_db"
     prefix = "/api/0"
-    _db_fd = None
-    _db_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -49,8 +47,7 @@ class BaseTestCase(unittest.TestCase):
         if os.getenv("LATHERMAIL_TEST_DB_TYPE", "sqlite") == "mongo":
             conf["DB_URI"] = conf["SQLALCHEMY_DATABASE_URI"] = "mongodb://localhost/%s" % cls.db_name
         else:
-            cls._db_fd, cls._db_file = tempfile.mkstemp()
-            conf["DB_URI"] = conf["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % cls._db_file
+            conf["DB_URI"] = conf["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 
         lathermail.init_app()
         cls.c = lathermail.app.test_client()
@@ -61,10 +58,6 @@ class BaseTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         super(BaseTestCase, cls).tearDownClass()
-        cls.server.stop()
-        if cls._db_fd is not None:
-            os.close(cls._db_fd)
-            os.unlink(cls._db_file)
 
     def setUp(self):
         lathermail.db.switch_db(self.db_name)
@@ -167,20 +160,15 @@ class SmtpServerRunner(object):
     def start(self, port=2025):
         from lathermail.db import message_handler
         from lathermail.smtp import serve_smtp
-        from multiprocessing import Process
 
         def wrapper(**kwargs):
             lathermail.db.switch_db(self.db_name)
             serve_smtp(**kwargs)
 
-        p = Process(target=wrapper, kwargs=dict(handler=message_handler, port=port))
-        p.daemon = True
-        p.start()
-        self._process = p
+        smtp_thread = Thread(target=wrapper, kwargs=dict(handler=message_handler, port=port))
+        smtp_thread.daemon = True
+        smtp_thread.start()
         self.wait_start(port)
-
-    def stop(self):
-        self._process.terminate()
 
     def wait_start(self, port):
         timeout = 0.1
