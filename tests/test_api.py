@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from tests.utils import BaseTestCase, smtp_send_email, prepare_send_to_field
+from tests.utils import BaseTestCase, smtp_send_email, prepare_send_to_field, SendEmailError, InvalidStatus
 from lathermail.utils import utcnow
 
 
@@ -128,6 +128,42 @@ class ApiTestCase(BaseTestCase):
         msg = self.get("/messages/").json["message_list"][0]
         self.assertEquals(self.get("/messages/{}/attachments/{}".format(msg["_id"], 1),
                                    parse_json=False).data, binary_data)
+
+    def test_get_single_message(self):
+        self.send()
+        msg = self.get("/messages/").json["message_list"][0]
+        msg2 = self.get("/messages/{0}".format(msg["_id"])).json["message_info"]
+
+        msg.pop("read")
+        msg2.pop("read")
+        self.assertEquals(msg2, msg)
+
+    def test_not_found(self):
+        self.send()
+        wrong_id = "56337fb2b2c79a71698baaaa"
+        with self.assertRaises(InvalidStatus) as e:
+            self.get("/messages/" + wrong_id)
+        self.assertEquals(e.exception.response.status_code, 404)
+
+        msg = self.get("/messages/").json["message_list"][0]
+
+        for part in 0, 1, 2:
+            with self.assertRaises(InvalidStatus):
+                self.get("/messages/{0}/attachments/{1}".format(msg["_id"], part))
+            self.assertEquals(e.exception.response.status_code, 404)
+
+        with self.assertRaises(InvalidStatus) as e:
+            self.get("/messages/{0}/attachments/1".format(wrong_id))
+        self.assertEquals(e.exception.response.status_code, 404)
+
+    def test_wrong_smtp_credentials(self):
+        with self.assertRaises(SendEmailError) as e:
+            self.send(user="\0\0")
+        self.assertEquals(e.exception.args[0].smtp_code, 535)
+
+        with self.assertRaises(SendEmailError) as e:
+            smtp_send_email("to@example.com", "no credentials", "from@example.com", "body", port=self.port)
+        self.assertEquals(e.exception.args[0].smtp_code, 530)
 
 
 def auth(user, password):

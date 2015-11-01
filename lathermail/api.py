@@ -52,12 +52,16 @@ class Attachment(Resource):
         try:
             part = messages[0]["parts"][attachment_index]
         except IndexError:
-            return {"error": "Attachment not found"}, 404
-        return Response(
-            part["body"], mimetype=part["type"],
-            headers={"Content-Disposition": content_disposition(part["filename"],
-                                                                request.environ.get('HTTP_USER_AGENT'))}
-        )
+            pass
+        else:
+            if part["filename"]:
+                return Response(
+                    part["body"], mimetype=part["type"],
+                    headers={"Content-Disposition": content_disposition(part["filename"],
+                                                                        request.environ.get('HTTP_USER_AGENT'))}
+                )
+
+        return {"error": "Attachment not found"}, 404
 
 
 class InboxList(Resource):
