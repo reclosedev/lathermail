@@ -92,7 +92,10 @@ def find_messages(password, inbox=None, fields=None, limit=0, include_attachment
 
 
 def remove_messages(password, inbox=None, fields=None):
-    message_ids_query = _prepare_sql_query(password, inbox, fields, order=False, to_select=Message._id)
+    message_ids_query = _prepare_sql_query(
+        password, inbox, fields,
+        order=False, to_select=Message._id, load_recipients=False
+    )
     count = Message.query.filter(Message._id.in_(message_ids_query)).delete(False)
     db.session.commit()
     return count
@@ -113,9 +116,8 @@ def _convert_sa_message_to_dict(message):
     return result
 
 
-def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, to_select=Message):
+def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, to_select=Message, load_recipients=True):
     filters = []
-    recipients_filters = []
     if password is not None:
         filters.append(Message.password == password)
     if inbox is not None:
@@ -126,7 +128,7 @@ def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, t
             if field in ALLOWED_QUERY_FIELDS and value is not None:
                 if field.startswith("recipients."):
                     sub_field = field.rsplit(".", 1)[1]
-                    recipients_filters.append(getattr(Recipient, sub_field) == value)
+                    filters.append(getattr(Recipient, sub_field) == value)
                 else:
                     filters.append(getattr(Message, field) == value)
 
@@ -138,10 +140,8 @@ def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, t
             filters.append(Message.subject.like(u"%{0}%".format(fields["subject_contains"])))
 
     query = db.session.query(to_select).join(Recipient).filter(db.and_(*filters))
-    if recipients_filters:
-        message_by_recipient = db.session.query(Recipient.message_id).filter(db.and_(*recipients_filters))
-        query = query.filter(Message._id.in_(message_by_recipient))
-
+    if load_recipients:
+        query = query.options(db.contains_eager(Message.recipients))
     if order:
         query = query.order_by(Message.created_at.desc())
     if limit:
