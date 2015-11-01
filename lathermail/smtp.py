@@ -7,6 +7,8 @@ import logging
 import socket
 import base64
 
+from lathermail.compat import bytes
+
 log = logging.getLogger(__name__)
 
 
@@ -30,6 +32,7 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
     def smtp_EHLO(self, arg):
         self.push("250-%s\r\n"
                   "250 AUTH PLAIN" % self.fqdn)
+        self.seen_greeting = arg
 
     def smtp_AUTH(self, arg):
         try:
@@ -38,7 +41,7 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
             self.push("535 5.7.8  Authentication credentials invalid")
         else:
             self.push("235 2.7.0  Authentication Succeeded")
-            self.user, self.password = user, password
+            self.user, self.password = user.decode("ascii"), password.decode("ascii")
 
     def smtp_MAIL(self, arg):
         if not (self.user and self.password):
@@ -49,8 +52,8 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
     @staticmethod
     def decode_plain_auth(arg):
         user_password = arg.split()[-1]
-        user_password = base64.b64decode(user_password)
-        return user_password.split("\0", 3)[1:]
+        user_password = base64.b64decode(bytes(user_password, "ascii"))
+        return user_password.split(b"\0", 3)[1:]
 
 
 class InboxServer(smtpd.SMTPServer, object):
@@ -90,7 +93,7 @@ def serve_smtp(host="127.0.0.1", port=10252, handler=None):
     if handler is None:
 
         def handler(to, sender, *args):
-            print to, sender
+            print("{0} <- {1}".format(to, sender))
 
     InboxServer((host, port), handler)
     log.info("Running SMTP server on %s:%s", host, port)

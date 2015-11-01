@@ -1,10 +1,11 @@
 import re
 import json
 import datetime
-from urllib import quote
 
 from flask import make_response
 from bson import Timestamp, ObjectId
+
+from lathermail.compat import quote
 
 
 def output_json(data, code, headers=None):
@@ -25,6 +26,8 @@ class MongoEncoder(json.JSONEncoder):
             return str(obj)
         elif hasattr(obj, "to_json"):
             return obj.to_json()
+        elif isinstance(obj, bytes):
+            return obj.decode("utf-8")
         else:
             return super(MongoEncoder, self).default(obj)
 

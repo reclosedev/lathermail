@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import dateutil.parser
+
 from flask.ext.restful import reqparse, types
+
+from lathermail.compat import unicode
 
 
 def iso_date(value):

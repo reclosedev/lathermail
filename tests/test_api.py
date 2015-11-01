@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from tests.utils import BaseTestCase, smtp_send_email, prepare_send_to_field, SendEmailError, InvalidStatus
 from lathermail.utils import utcnow
 
@@ -20,7 +22,7 @@ class ApiTestCase(BaseTestCase):
             smtp_send_email(
                 to, subject_fmt.format(i), u"%s <%s>" % (sender_name, sender_addr), body_fmt.format(i),
                 user=self.inbox, password=self.password, port=self.port, emails=emails,
-                attachments=[(u"tасдest.txt", file_content)]
+                attachments=[("tасдest.txt", file_content)]
             )
         res = self.get("/messages/").json
         self.assertEquals(res["message_count"], n)
@@ -119,7 +121,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(self.get("/inboxes/", headers=auth(None, "unknown")).json["inbox_count"], 0)
 
     def test_binary_attach(self):
-        binary_data = "%PDF\x93"
+        binary_data = b"%PDF\x93"
         smtp_send_email(
             "test@example.com", "Binary test", u"Test <asdf@exmapl.com>", u"Text body да",
             user=self.inbox, password=self.password, port=self.port,

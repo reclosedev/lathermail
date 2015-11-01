@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import os
 import time
 import socket
-import httplib
 import unittest
 import smtplib
 import json
-import urllib
 from threading import Thread
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import formatdate, formataddr
 from email.header import Header
-from email import Encoders
 
+from lathermail.compat import Encoders, NO_CONTENT, unicode, urlencode, IS_PY3
 import lathermail
 import lathermail.db
 import lathermail.smtp
@@ -76,17 +76,17 @@ class BaseTestCase(unittest.TestCase):
         if params:
             params = _prepare_params(params)
             if method in ("get", "delete"):
-                new_kwargs["query_string"] = urllib.urlencode(params)
+                new_kwargs["query_string"] = urlencode(params)
             else:
                 new_kwargs["data"] = params
 
         rv = func(self.prefix + url, **new_kwargs)
         if parse_json:
             try:
-                rv.json = json.loads(rv.data)
+                rv.json = json.loads(rv.data.decode("utf-8"))
             except ValueError as e:
-                if rv.status_code != httplib.NO_CONTENT:
-                    print "JSON decode error: {}, data:\n{}".format(e, rv.data)
+                if rv.status_code != NO_CONTENT:
+                    print("JSON decode error: {}, data:\n{}".format(e, rv.data))
                 rv.json = None
         if raise_errors and rv.status_code >= 400:
             raise InvalidStatus(rv)
@@ -110,12 +110,12 @@ def _prepare_params(params):
         if isinstance(v, str):
             return v
         return str(v)
-    return {convert(k): convert(v) for k, v in params.iteritems()}
+    return {convert(k): convert(v) for k, v in params.items()}
 
 
 def prepare_send_to_field(name_email_pairs):
     return u", ".join([formataddr((str(Header(name, "utf-8")), email))
-                       for name, email in name_email_pairs]).encode("utf-8")
+                       for name, email in name_email_pairs])#.encode("utf-8")
 
 
 def content_disposition(filename):
@@ -134,7 +134,10 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
         part = MIMEBase('application', "octet-stream")
         part.set_payload(data)
         Encoders.encode_base64(part)
-        part.add_header('Content-Disposition', content_disposition(name))
+        if IS_PY3:
+            part.add_header('Content-Disposition', 'attachment', filename=name)
+        else:
+            part.add_header('Content-Disposition', content_disposition(name))
         msg.attach(part)
     try:
         s = smtplib.SMTP(server_host, port)
@@ -145,7 +148,7 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
         s.sendmail(from_addr, emails, msg.as_string())
         s.quit()
         #print(u"Sent email to [%s] from [%s] with subject [%s]", email, from_addr, subject)
-    except (smtplib.SMTPConnectError, smtplib.SMTPException, IOError), e:
+    except (smtplib.SMTPConnectError, smtplib.SMTPException, IOError) as e:
         print(u"Sending email error to [%s] from [%s] with subject [%s]:\n%s", email, from_addr, subject, e)
         raise SendEmailError(e)
 

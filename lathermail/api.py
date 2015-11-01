@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from flask import Blueprint, Response, request
 from flask.ext import restful
 from flask.ext.restful import Resource
