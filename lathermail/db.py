@@ -1,16 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
+import logging
 
-from . import app
 
-db_uri = app.config.get("DB_URI")
-if not db_uri:
-    app.config["DB_URI"] = db_uri = "sqlite:///" + os.path.expanduser("~/.lathermail.db")
+engine = None
 
-if db_uri.startswith("mongodb:/"):
-    app.config["MONGO_URI"] = db_uri
-    from .storage.mongo import *  # noqa
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-    from .storage.alchemy import *  # noqa
+
+def init(app):
+    global engine
+
+    db_uri = app.config["DB_URI"]
+    if db_uri.startswith("mongodb:/"):
+        app.config["MONGO_URI"] = db_uri
+        from .storage import mongo
+        engine = mongo
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        from .storage import alchemy
+        engine = alchemy
+
+    logging.info("Using '%s' DB engine. URI: '%s'", engine.__name__, db_uri)
+    engine.init_app_for_db(app)

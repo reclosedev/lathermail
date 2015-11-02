@@ -1,11 +1,7 @@
 import os
 
 
-# This hack for tests sits here, because tests launch SMTP server subprocess
-if os.getenv("LATHERMAIL_TEST_DB_TYPE", "sqlite") == "mongo":
-    DB_URI = "mongodb://localhost/lathermail_test_db"
-
-
+DB_URI = "sqlite:///" + os.path.expanduser("~/.lathermail.db")
 DEBUG_MODE = False
 SMTP_HOST = "127.0.0.1"
 SMTP_PORT = 2525

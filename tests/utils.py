@@ -17,6 +17,7 @@ from email import Encoders
 
 import lathermail
 import lathermail.db
+import lathermail.smtp
 
 
 class InvalidStatus(Exception):
@@ -60,14 +61,12 @@ class BaseTestCase(unittest.TestCase):
         super(BaseTestCase, cls).tearDownClass()
 
     def setUp(self):
-        lathermail.db.switch_db(self.db_name)
+        lathermail.db.engine.switch_db(self.db_name)
         super(BaseTestCase, self).setUp()
 
     def tearDown(self):
-        from lathermail.db import drop_database
-
         with lathermail.app.app_context():
-            drop_database(self.db_name)
+            lathermail.db.engine.drop_database(self.db_name)
 
     def request(self, method, url, params=None, raise_errors=True, parse_json=True, **kwargs):
         method = method.lower()
@@ -158,14 +157,12 @@ class SmtpServerRunner(object):
         self.db_name = db_name
 
     def start(self, port=2025):
-        from lathermail.db import message_handler
-        from lathermail.smtp import serve_smtp
 
         def wrapper(**kwargs):
-            lathermail.db.switch_db(self.db_name)
-            serve_smtp(**kwargs)
+            lathermail.db.engine.switch_db(self.db_name)
+            lathermail.smtp.serve_smtp(**kwargs)
 
-        smtp_thread = Thread(target=wrapper, kwargs=dict(handler=message_handler, port=port))
+        smtp_thread = Thread(target=wrapper, kwargs=dict(handler=lathermail.db.engine.message_handler, port=port))
         smtp_thread.daemon = True
         smtp_thread.start()
         self.wait_start(port)

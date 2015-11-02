@@ -56,6 +56,8 @@ def init_app_for_db(application):
             cursor.execute("PRAGMA synchronous = 0")
             cursor.close()
 
+    _create_tables()
+
 
 def message_handler(*args, **kwargs):
     msg = convert_message_to_dict(*args, **kwargs)

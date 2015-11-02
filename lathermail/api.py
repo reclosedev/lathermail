@@ -3,7 +3,7 @@ from flask import Blueprint, Response, request
 from flask.ext import restful
 from flask.ext.restful import Resource
 
-from .db import find_messages, remove_messages, get_inboxes
+from . import db
 from .validators import parser
 from .representations import output_json, content_disposition
 
@@ -16,12 +16,12 @@ api.representations.update({"application/json": output_json})
 class MessageList(Resource):
     def get(self):
         args = parser.parse_args()
-        messages = list(find_messages(args.password, args.inbox, args))
+        messages = list(db.engine.find_messages(args.password, args.inbox, args))
         return {'message_list': messages, 'message_count': len(messages)}
 
     def delete(self):
         args = parser.parse_args()
-        remove_messages(args.password, args.inbox, args)
+        db.engine.remove_messages(args.password, args.inbox, args)
         return '', 204
 
 
@@ -29,7 +29,7 @@ class Message(Resource):
     def get(self, message_id):
         args = parser.parse_args()
         args["_id"] = message_id
-        messages = list(find_messages(args.password, args.inbox, args, limit=1))
+        messages = list(db.engine.find_messages(args.password, args.inbox, args, limit=1))
         if not messages:
             return {"error": "Message not found"}, 404
         return {"message_info": messages[0]}
@@ -37,7 +37,7 @@ class Message(Resource):
     def delete(self, message_id):
         args = parser.parse_args()
         args["_id"] = message_id
-        if remove_messages(args.password, args.inbox, args):
+        if db.engine.remove_messages(args.password, args.inbox, args):
             return '', 204
         return {"error": "Message not found"}, 404
 
@@ -45,7 +45,7 @@ class Message(Resource):
 class Attachment(Resource):
     def get(self, message_id, attachment_index):
         args = {"_id": message_id}
-        messages = list(find_messages(None, fields=args, limit=1, include_attachment_bodies=True))
+        messages = list(db.engine.find_messages(None, fields=args, limit=1, include_attachment_bodies=True))
         if not messages:
             return {"error": "Message not found"}, 404
 
@@ -67,7 +67,7 @@ class Attachment(Resource):
 class InboxList(Resource):
     def get(self):
         args = parser.parse_args()
-        inboxes = get_inboxes(args.password)
+        inboxes = db.engine.get_inboxes(args.password)
         return {'inbox_list': inboxes, 'inbox_count': len(inboxes)}
 
 

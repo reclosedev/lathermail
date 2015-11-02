@@ -6,7 +6,7 @@ from threading import Thread
 
 from lathermail import app, init_app
 from lathermail.smtp import serve_smtp
-from lathermail.db import message_handler
+from lathermail import db
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     app.config["DEBUG_MODE"] = args.debug
     init_app()
 
-    t = Thread(target=serve_smtp, kwargs=dict(handler=message_handler,
+    t = Thread(target=serve_smtp, kwargs=dict(handler=db.engine.message_handler,
                                               host=args.smtp_host, port=args.smtp_port))
     t.daemon = True
     t.start()
