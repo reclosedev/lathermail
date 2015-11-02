@@ -10,7 +10,7 @@ class ApiTestCase(BaseTestCase):
         emails = [t[1] for t in to_tuple]
         to = prepare_send_to_field(to_tuple)
         n = 3
-        body_fmt = u"you you привет {}"
+        body_fmt = u"you you привет {} \n\naaa\nbbb\n<a href='aaa'>zz</a>"
         subject_fmt = u"Test subject хэллоу {}"
         file_content = "file content"
         sender_name = "Me"

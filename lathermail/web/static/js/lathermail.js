@@ -26,11 +26,12 @@ var lathermailApp = angular.module('lathermailApp', ['ngRoute', 'angularMoment',
 
 lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams, $location, $localStorage) {
   $scope.$storage = $localStorage.$default({
-    inbox: "inbox",
+    inbox: null,
     password: "password"
   });
   $scope.query = "";
   $scope.params = $routeParams;
+  $scope.inboxes = [];
   $scope.tabs = [
     {url: "text", title: function(){return "Text"}},
     {url: "raw", title: function(){return "Raw"}},
@@ -58,6 +59,14 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
       "X-Mail-Inbox": $scope.$storage.inbox,
       "X-Mail-Password": $scope.$storage.password
     };
+
+    $http.get("/api/0/inboxes/").then(function(resp) {
+      $scope.inboxes = resp.data.inbox_list;
+      if ($scope.inboxes.length && (!$scope.$storage.inbox || $scope.inboxes.indexOf($scope.$storage.inbox) == -1)) {
+        $scope.$storage.inbox = $scope.inboxes[0];
+      }
+    });
+
     $http.get("/api/0/messages/").then(function (resp) {
       $scope.messages = resp.data.message_list;
       $scope.messageById  = {};

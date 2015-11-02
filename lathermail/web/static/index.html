@@ -35,14 +35,18 @@
     }
   </style>
 </head>
-<body ng-controller="lathermailCtrl">
+<body ng-controller="lathermailCtrl" ng-cloak>
 
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-6">
       <form class="form-inline" role="form">
-        <label for="inbox">Inbox:</label> <input type="text" ng-model="$storage.inbox" class="form-control" id="inbox">
-        <label for="password">Password:</label> <input type="text" ng-model="$storage.password" class="form-control" id="password">
+        <label for="password">Password:</label>
+        <input type="text" ng-model="$storage.password" class="form-control" id="password">
+        <label for="inbox">Inbox:</label>
+        <select id="inbox" ng-model="$storage.inbox" ng-change="refreshMessages()" class="form-control">
+          <option ng-repeat="inb in inboxes" value="{{inb}}">{{inb}}</option>
+        </select>
         <button ng-click="refreshMessages()" class="btn">Refresh</button>
       </form>
     </div>
@@ -102,7 +106,7 @@
 
       <!--Tab templates-->
       <script type="text/ng-template" id="message.text.html">
-        <div>{{ selectedMessage.parts[0].body }}</div>
+        <pre>{{ selectedMessage.parts[0].body }}</pre>
       </script>
       <script type="text/ng-template" id="message.raw.html">
         <pre>{{ selectedMessage.message_raw }}</pre>
