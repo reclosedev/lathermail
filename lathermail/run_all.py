@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
 import argparse
 from threading import Thread
 
@@ -19,7 +20,13 @@ def main():
     parser.add_argument("--smtp-host", default=app.config["SMTP_HOST"], help="SMTP host")
     parser.add_argument("--smtp-port", default=app.config["SMTP_PORT"], type=int, help="SMTP port")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
+    parser.add_argument("--debug-smtp", action="store_true", help="Turn on SMTP debug info")
     args = parser.parse_args()
+
+    if args.debug_smtp:
+        import smtpd
+        smtpd.DEBUGSTREAM = sys.stderr
+
     app.config["DB_URI"] = args.db_uri
     app.config["DEBUG_MODE"] = args.debug
     init_app()
