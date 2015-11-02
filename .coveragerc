@@ -1,0 +1,2 @@
+[report]
+omit = */run_all.py,*/web/*
