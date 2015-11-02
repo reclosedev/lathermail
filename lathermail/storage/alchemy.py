@@ -49,11 +49,13 @@ def init_app_for_db(application):
     db.init_app(application)
     application.url_map.converters['ObjectId'] = UnicodeConverter
 
-    if application.config["DB_URI"].startswith("sqlite") and application.config.get("SQLITE_FAST_SAVE"):
+    if application.config["DB_URI"].startswith("sqlite"):
         @event.listens_for(db.engine, "connect")
         def _on_engine_connect(dbapi_connection, connection_record):
             cursor = dbapi_connection.cursor()
-            cursor.execute("PRAGMA synchronous = 0")
+            cursor.execute("PRAGMA foreign_keys=ON")
+            if application.config.get("SQLITE_FAST_SAVE"):
+                cursor.execute("PRAGMA synchronous = 0")
             cursor.close()
 
     _create_tables()
