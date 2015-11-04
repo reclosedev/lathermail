@@ -12,15 +12,15 @@ class ApiTestCase(BaseTestCase):
         emails = [t[1] for t in to_tuple]
         to = prepare_send_to_field(to_tuple)
         n = 3
-        body_fmt = u"you you привет {} \n\naaa\nbbb\n<a href='aaa'>zz</a>"
-        subject_fmt = u"Test subject хэллоу {}"
+        body_fmt = "you you привет {} \n\naaa\nbbb\n<a href='aaa'>zz</a>"
+        subject_fmt = "Test subject хэллоу {}"
         file_content = "file content"
         sender_name = "Me"
         sender_addr = "asdf@exmapl.com"
 
         for i in range(n):
             smtp_send_email(
-                to, subject_fmt.format(i), u"%s <%s>" % (sender_name, sender_addr), body_fmt.format(i),
+                to, subject_fmt.format(i), "%s <%s>" % (sender_name, sender_addr), body_fmt.format(i),
                 user=self.inbox, password=self.password, port=self.port, emails=emails,
                 attachments=[("tасдest.txt", file_content)]
             )
@@ -123,7 +123,7 @@ class ApiTestCase(BaseTestCase):
     def test_binary_attach(self):
         binary_data = b"%PDF\x93"
         smtp_send_email(
-            "test@example.com", "Binary test", u"Test <asdf@exmapl.com>", u"Text body да",
+            "test@example.com", "Binary test", "Test <asdf@exmapl.com>", "Text body да",
             user=self.inbox, password=self.password, port=self.port,
             attachments=[("filename.pd", binary_data)]
         )

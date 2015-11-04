@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import os
 import time
@@ -14,10 +14,10 @@ from email.mime.text import MIMEText
 from email.utils import formatdate, formataddr
 from email.header import Header
 
-from lathermail.compat import Encoders, NO_CONTENT, unicode, urlencode, IS_PY3
 import lathermail
 import lathermail.db
 import lathermail.smtp
+from lathermail.compat import Encoders, NO_CONTENT, unicode, urlencode
 
 
 class InvalidStatus(Exception):
@@ -114,12 +114,8 @@ def _prepare_params(params):
 
 
 def prepare_send_to_field(name_email_pairs):
-    return u", ".join([formataddr((str(Header(name, "utf-8")), email))
-                       for name, email in name_email_pairs])#.encode("utf-8")
-
-
-def content_disposition(filename):
-    return 'attachment; filename="{0}"'.format(Header(filename, "utf-8"))
+    return ", ".join([formataddr((str(Header(name, "utf-8")), email))
+                       for name, email in name_email_pairs])
 
 
 def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", user=None, password=None,
@@ -134,10 +130,7 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
         part = MIMEBase('application', "octet-stream")
         part.set_payload(data)
         Encoders.encode_base64(part)
-        if IS_PY3:
-            part.add_header('Content-Disposition', 'attachment', filename=name)
-        else:
-            part.add_header('Content-Disposition', content_disposition(name))
+        part.add_header('Content-Disposition', 'attachment', filename=(Header(name, 'utf-8').encode()))
         msg.attach(part)
     try:
         s = smtplib.SMTP(server_host, port)
@@ -149,7 +142,7 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
         s.quit()
         #print(u"Sent email to [%s] from [%s] with subject [%s]", email, from_addr, subject)
     except (smtplib.SMTPConnectError, smtplib.SMTPException, IOError) as e:
-        print(u"Sending email error to [%s] from [%s] with subject [%s]:\n%s", email, from_addr, subject, e)
+        print("Sending email error to [%s] from [%s] with subject [%s]:\n%s", email, from_addr, subject, e)
         raise SendEmailError(e)
 
 

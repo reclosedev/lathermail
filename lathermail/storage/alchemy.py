@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function
+
 import uuid
 import logging
 
@@ -141,7 +143,7 @@ def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, t
         if fields.get("created_at_lt") is not None:
             filters.append(Message.created_at < fields["created_at_lt"])
         if fields.get("subject_contains"):
-            filters.append(Message.subject.like(u"%{0}%".format(fields["subject_contains"])))
+            filters.append(Message.subject.like("%{0}%".format(fields["subject_contains"])))
 
     query = db.session.query(to_select).join(Recipient).filter(db.and_(*filters))
     if load_recipients:
