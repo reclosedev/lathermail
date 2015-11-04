@@ -2,8 +2,10 @@
 *.py[co]
 .idea
 *.sqlite
+.tox
+.cache
+dist
 build
 _build
-dist
 MANIFEST
 *.egg-info/
