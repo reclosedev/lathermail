@@ -10,7 +10,8 @@ lathermail
 SMTP Server with API for email testing inspired by `mailtrap <https://mailtrap.io/>`_ and
 `maildump <https://github.com/ThiefMaster/maildump>`_
 
-Can store messages in MongoDB or any SQLAlchemy supported DB (e.g., sqlite)
+Can store messages in MongoDB or any SQLAlchemy supported DB (e.g., sqlite). Supports Python 2.7, 3.4, 3.5, pypy.
+
 
 
 Usage::
