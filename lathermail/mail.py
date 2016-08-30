@@ -6,6 +6,8 @@ import email
 from email.header import decode_header
 from email.utils import getaddresses
 
+from .compat import bytes
+
 
 def convert_addresses(raw_header):
     result = []
@@ -20,7 +22,7 @@ def convert_message_to_dict(to, sender, message, body, user, password):
     result = {
         "inbox": user,
         "password": password,
-        "message_raw": body,
+        "message_raw": bytes(body, "utf8"),
         "sender_raw": message["From"],
         "recipients_raw": message["To"],
         # for easy searching

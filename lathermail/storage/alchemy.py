@@ -13,7 +13,6 @@ from . import ALLOWED_QUERY_FIELDS
 from .. import app
 from ..mail import convert_message_to_dict, expand_message_fields
 from ..utils import utcnow, as_utc
-from ..compat import bytes
 
 
 log = logging.getLogger(__name__)
@@ -72,7 +71,6 @@ def message_handler(*args, **kwargs):
     msg["sender_name"] = sender["name"]
     msg["sender_address"] = sender["address"]
     recipients = msg.pop("recipients")
-    msg["message_raw"] = bytes(msg["message_raw"], "utf8")
 
     with app.app_context():
         try:
