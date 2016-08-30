@@ -33,7 +33,7 @@ def convert_message_to_dict(to, sender, message, body, user, password):
 
 
 def expand_message_fields(message_info, include_attachment_bodies=False):
-    message = email.message_from_string(message_info["message_raw"])
+    message = email.message_from_string(message_info["message_raw"].decode("utf8"))
     message_info["parts"] = list(_iter_parts(message, include_attachment_bodies))
     return message_info
 
