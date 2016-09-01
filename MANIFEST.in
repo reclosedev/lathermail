@@ -1,4 +1,4 @@
-include LICENSE README.rst lathermail.conf.example
+include LICENSE README.rst CHANGELOG.rst lathermail.conf.example
 include *.py
 recursive-include lathermail/web/static *
 recursive-include tests *.py

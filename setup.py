@@ -18,7 +18,7 @@ def read(fname):
 setup(
     name="lathermail",
     url="https://github.com/reclosedev/lathermail/",
-    version="0.2.0",
+    version="0.3.0",
     author="Roman Haritonov",
     description="SMTP Server with API for email testing inspired by mailtrap and maildump",
     author_email="reclosedev@gmail.com",
@@ -46,4 +46,5 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Server",
         "Topic :: Communications :: Email",
     ],
+    long_description=read('README.rst') + '\n\n' + read('CHANGELOG.rst'),
 )
