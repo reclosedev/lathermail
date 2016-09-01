@@ -119,13 +119,15 @@ def prepare_send_to_field(name_email_pairs):
 
 
 def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", user=None, password=None,
-                     emails=None, attachments=None, port=0):
+                     emails=None, attachments=None, port=0, html_body=None):
     msg = MIMEMultipart()
     msg['To'] = email
     msg['Subject'] = subject
     msg['From'] = from_addr
     msg['Date'] = formatdate(localtime=True)
     msg.attach(MIMEText(body, _charset="utf8"))
+    if html_body:
+        msg.attach(MIMEText(html_body, "html", _charset="utf8"))
     for name, data in attachments or []:
         part = MIMEBase('application', "octet-stream")
         part.set_payload(data)

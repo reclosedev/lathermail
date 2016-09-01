@@ -131,6 +131,24 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(self.get("/messages/{}/attachments/{}".format(msg["_id"], 1),
                                    parse_json=False).data, binary_data)
 
+    def test_html_alternative_and_attach(self):
+        binary_data = b"%PDF\x93"
+        html_body = "<html><body><h1>hello</h1></body></html>"
+        text_body = "Text body да"
+        smtp_send_email(
+            "test@example.com", "Binary test", "Test <asdf@exmapl.com>", text_body,
+            user=self.inbox, password=self.password, port=self.port,
+            attachments=[("filename.pd", binary_data)],
+            html_body=html_body
+        )
+        msg = self.get("/messages/").json["message_list"][0]
+        self.assertEqual(len(msg["parts"]), 3)
+        self.assertEqual(msg["parts"][0]["body"], text_body)
+        self.assertEqual(msg["parts"][1]["body"], html_body)
+        self.assertIsNone(msg["parts"][2]["body"])
+        self.assertEquals(self.get("/messages/{}/attachments/{}".format(msg["_id"], 2),
+                                   parse_json=False).data, binary_data)
+
     def test_get_single_message(self):
         self.send()
         msg = self.get("/messages/").json["message_list"][0]

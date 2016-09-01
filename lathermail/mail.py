@@ -41,7 +41,7 @@ def expand_message_fields(message_info, include_attachment_bodies=False):
 
 
 def _iter_parts(message, include_attachment_bodies):
-    parts = [message] if not message.is_multipart() else message.get_payload()
+    parts = [message] if not message.is_multipart() else message.walk()
 
     for i, part in enumerate(parts):
         filename = part.get_filename()
@@ -50,6 +50,8 @@ def _iter_parts(message, include_attachment_bodies):
             body = None
         else:
             body = part.get_payload(decode=True)
+        if not is_attachment and not body:
+            continue
         charset = part.get_content_charset()
         if charset:
             try:
