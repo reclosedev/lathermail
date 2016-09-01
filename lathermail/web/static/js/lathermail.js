@@ -34,6 +34,7 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
   $scope.inboxes = [];
   $scope.tabs = [
     {url: "text", title: function(){return "Text"}},
+    {url: "html", title: function(){return "HTML"}},
     {url: "raw", title: function(){return "Raw"}},
     {
       url: "attachments",
@@ -113,6 +114,11 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
   }
 })
 
+.filter("trust", ['$sce', function($sce) {
+  return function(htmlCode){
+    return $sce.trustAsHtml(htmlCode);
+  }
+}])
 
 .directive("recipients", function(){
   return {

@@ -108,6 +108,11 @@
       <script type="text/ng-template" id="message.text.html">
         <pre>{{ selectedMessage.parts[0].body }}</pre>
       </script>
+      <script type="text/ng-template" id="message.html.html">
+        <div ng-repeat="part in selectedMessage.parts" ng-show="part.type === 'text/html'" >
+          <div ng-bind-html="part.body | trust"></div>
+        </div>
+      </script>
       <script type="text/ng-template" id="message.raw.html">
         <pre>{{ selectedMessage.message_raw }}</pre>
       </script>
