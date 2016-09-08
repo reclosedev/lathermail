@@ -48,7 +48,7 @@ def _iter_parts(message, include_attachment_bodies):
 
     index = 0
     for part in parts:
-        filename = part.get_filename()
+        filename = part.get_filename() or part.get("content-id")
         is_attachment = filename is not None
         if not include_attachment_bodies and is_attachment:
             body = None
