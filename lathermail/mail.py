@@ -6,7 +6,7 @@ import email
 from email.header import decode_header
 from email.utils import getaddresses
 
-from .compat import bytes, IS_PY3
+from .compat import bytes, IS_PY3, unicode
 
 
 def convert_addresses(raw_header):
@@ -19,20 +19,20 @@ def convert_addresses(raw_header):
 
 
 def convert_message_to_dict(to, sender, message, body, user, password):
-    if message["From"] is None:
-        message["From"] = sender
-    if message["To"] is None:
-        message["To"] = ','.join(to)
+    from_addr = message.get("From") or sender
+    to = message.get("To") or ",".join(to)
+    subject = message.get("Subject") or ""
+
     result = {
         "inbox": user,
         "password": password,
         "message_raw": bytes(body, "utf8"),
-        "sender_raw": message["From"],
-        "recipients_raw": message["To"],
+        "sender_raw": from_addr,
+        "recipients_raw": to,
         # for easy searching
-        "sender": convert_addresses(message["From"])[0],
-        "recipients": convert_addresses(message["To"]),
-        "subject": _header_to_unicode(message["Subject"]),
+        "sender": convert_addresses(from_addr)[0],
+        "recipients": convert_addresses(to),
+        "subject": _header_to_unicode(subject),
         "read": False,
     }
     return result

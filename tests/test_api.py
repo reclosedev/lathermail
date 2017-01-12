@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from tests.utils import BaseTestCase, smtp_send_email, prepare_send_to_field, SendEmailError, InvalidStatus
+from tests.utils import BaseTestCase, smtp_send_email, send_email_plain, prepare_send_to_field, SendEmailError,\
+    InvalidStatus
 from lathermail.utils import utcnow
 
 
@@ -185,6 +186,18 @@ class ApiTestCase(BaseTestCase):
             smtp_send_email("to@example.com", "no credentials", "from@example.com", "body", port=self.port)
         self.assertEquals(e.exception.args[0].smtp_code, 530)
 
+    def test_send_plain_message(self):
+        text_body = "Text body да"
+        to = "asdf@exmapl.com"
+        sender = "test@example.com"
+        send_email_plain(
+            sender, to, text_body.encode("utf-8"),
+            user=self.inbox, password=self.password, port=self.port,
+        )
+        msg = self.get("/messages/").json["message_list"][0]
+        self.assertEqual(msg["message_raw"], text_body)
+        self.assertEqual(msg["recipients_raw"], to)
+        self.assertEqual(msg["sender_raw"], sender)
 
 def auth(user, password):
     return {"X-Mail-Inbox": user, "X-Mail-Password": password}

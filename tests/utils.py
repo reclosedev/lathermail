@@ -148,6 +148,18 @@ def smtp_send_email(email, subject, from_addr, body, server_host="127.0.0.1", us
         raise SendEmailError(e)
 
 
+def send_email_plain(from_addr, to_addrs, msg, user=None, password=None, server_host="127.0.0.1", port=0):
+    try:
+        s = smtplib.SMTP(server_host, port)
+        if user and password:
+            s.login(user, password)
+        s.sendmail(from_addr, to_addrs, msg)
+        s.quit()
+    except (smtplib.SMTPConnectError, smtplib.SMTPException, IOError) as e:
+        print("Sending email error to [%s] from [%s] with subject [%s]:\n%s", to_addrs, from_addr, e)
+        raise SendEmailError(e)
+
+
 class SmtpServerRunner(object):
 
     def __init__(self, db_name):
