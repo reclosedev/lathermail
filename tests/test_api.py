@@ -187,7 +187,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(e.exception.args[0].smtp_code, 530)
 
     def test_send_plain_message(self):
-        text_body = "Text body да"
+        text_body = "Text body"
         to = "asdf@exmapl.com"
         sender = "test@example.com"
         send_email_plain(
