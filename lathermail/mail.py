@@ -19,6 +19,10 @@ def convert_addresses(raw_header):
 
 
 def convert_message_to_dict(to, sender, message, body, user, password):
+    if message["From"] is None:
+        message["From"] = sender
+    if message["To"] is None:
+        message["To"] = ','.join(to)
     result = {
         "inbox": user,
         "password": password,
