@@ -97,4 +97,8 @@ def serve_smtp(host="127.0.0.1", port=10252, handler=None):
 
     InboxServer((host, port), handler)
     log.info("Running SMTP server on %s:%s", host, port)
-    asyncore.loop()
+    while True:
+        try:
+            asyncore.loop(use_poll=True, count=10)
+        except:
+            log.exception("Error in loop:")
