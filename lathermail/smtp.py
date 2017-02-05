@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asynchat
 import email
 import smtpd
+import ssl
 import asyncore
 import logging
 import socket
@@ -12,7 +14,7 @@ from lathermail.compat import bytes
 log = logging.getLogger(__name__)
 
 
-class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
+class SMTPChannel(smtpd.SMTPChannel, object):
 
     def __init__(self, server, conn, addr, on_close=lambda s: None):
         smtpd.SMTPChannel.__init__(self, server, conn, addr)
@@ -30,9 +32,14 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
             log.exception("Exception in on_close for %s:", self._addr)
 
     def smtp_EHLO(self, arg):
-        self.push("250-%s\r\n"
-                  "250 AUTH PLAIN" % self.fqdn)
         self.seen_greeting = arg
+        parts = [self.fqdn, "AUTH PLAIN"]
+        if self.__server.ssl_ctx and not isinstance(self.__conn, ssl.SSLSocket):
+            parts.append("STARTTLS")
+        for i, feature in enumerate(parts):
+            is_last = i == len(parts) - 1
+            parts[i] = "250%s%s" % ((" " if is_last else "-"), feature)
+        self.push("\r\n".join(parts))
 
     def smtp_AUTH(self, arg):
         try:
@@ -49,6 +56,26 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
             return
         smtpd.SMTPChannel.smtp_MAIL(self, arg)
 
+    def smtp_STARTTLS(self, arg):
+        if arg:
+            self.push('501 Syntax error (no parameters allowed)')
+        elif self.__server.ssl_ctx and not isinstance(self.__conn, ssl.SSLSocket):
+            self.push('220 Ready to start TLS')
+            self.__conn.settimeout(30)
+            self.__conn = self.__server.ssl_ctx.wrap_socket(self.__conn, server_side=True)
+            self.__conn.settimeout(None)
+            # re-init channel
+            asynchat.async_chat.__init__(self, self.__conn)
+            self.__line = []
+            self.__state = self.COMMAND
+            self.__greeting = 0
+            self.__mailfrom = None
+            self.__rcpttos = []
+            self.__data = ''
+            log.debug('Peer: %s - negotiated TLS: %s', repr(self.__addr), repr(self.__conn.cipher()))
+        else:
+            self.push('454 TLS not available due to temporary reason')
+
     @staticmethod
     def decode_plain_auth(arg):
         user_password = arg.split()[-1]
@@ -58,7 +85,9 @@ class SMTPChannelWithAuth(smtpd.SMTPChannel, object):
 
 class InboxServer(smtpd.SMTPServer, object):
 
-    def __init__(self, localaddr, handler):
+    def __init__(self, localaddr, handler, ssl_ctx=None, tls_only=False):
+        self.ssl_ctx = ssl_ctx
+        self.tls_only = tls_only
         super(InboxServer, self).__init__(localaddr, None)
         self._handler = handler
         self._channel_by_peer = {}
@@ -68,9 +97,12 @@ class InboxServer(smtpd.SMTPServer, object):
         if pair is not None:
             conn, addr = pair
             log.info("Incoming connection from %s", repr(addr))
+            if self.ssl_ctx and self.tls_only:
+                conn = self.ssl_ctx.wrap_socket(conn, server_side=True)
+                log.debug("Peer: %s - negotiated TLS: %s", repr(addr), repr(conn.cipher()))
             # Since there is no way to pass channel or additional data (user, password) to process_message()
             # we have dict of channels indexed by peers. It's cleaned on channel close()
-            self._channel_by_peer[addr] = SMTPChannelWithAuth(self, conn, addr, on_close=self._on_channel_close)
+            self._channel_by_peer[addr] = SMTPChannel(self, conn, addr, on_close=self._on_channel_close)
 
     def process_message(self, peer, mailfrom, rcpttos, data):
         channel = self._channel_by_peer.get(peer)
