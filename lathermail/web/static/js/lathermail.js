@@ -61,28 +61,32 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
       "X-Mail-Password": $scope.$storage.password
     };
 
-    $http.get("/api/0/inboxes/").then(function(resp) {
+    return $http.get("/api/0/inboxes/").then(function(resp) {
       $scope.inboxes = resp.data.inbox_list;
       if ($scope.inboxes.length && (!$scope.$storage.inbox || $scope.inboxes.indexOf($scope.$storage.inbox) == -1)) {
         $scope.$storage.inbox = $scope.inboxes[0];
       }
-    });
+      $http.defaults.headers.common["X-Mail-Inbox"] = $scope.$storage.inbox;
+    }).then(function () {
+      return $http.get("/api/0/messages/").then(function (resp) {
+        $scope.messages = resp.data.message_list;
+        $scope.messageById  = {};
 
-    $http.get("/api/0/messages/").then(function (resp) {
-      $scope.messages = resp.data.message_list;
-      $scope.messageById  = {};
-      $scope.messages.forEach(function(message){
-        $scope.messageById[message._id] = message;
+        var index = 0;
+        $scope.messages.forEach(function(message){
+          message.index = index++;
+          $scope.messageById[message._id] = message;
+        });
+
+        if ($routeParams.messageId) {
+          $scope.selectMessage($scope.messageById[$routeParams.messageId]);
+        } else {
+          $location.path("/messages/" + $scope.messages[0]._id)
+        }
+        if (!$scope.messages || !$scope.messages.length){
+          $scope.selectedMessage = null;
+        }
       });
-
-      if ($routeParams.messageId) {
-        $scope.selectMessage($scope.messageById[$routeParams.messageId]);
-      } else {
-        $location.path("/messages/" + $scope.messages[0]._id)
-      }
-      if (!$scope.messages || !$scope.messages.length){
-        $scope.selectedMessage = null;
-      }
     });
   };
 
@@ -92,6 +96,27 @@ lathermailApp.controller('lathermailCtrl', function ($scope, $http, $routeParams
 
   $scope.isActiveMessage = function(message){
     return $scope.selectedMessage  && message._id === $scope.selectedMessage._id;
+  };
+
+  $scope.deleteMessage = function () {
+    $http.delete("/api/0/messages/" + $scope.selectedMessage._id).then(function (resp) {
+      var index = $scope.selectedMessage.index;
+
+      $scope.refreshMessages().then(function () {
+        index = Math.max(Math.min(index, $scope.messages.length), 0);
+        if($scope.messages.length > 1){
+          $scope.go('/messages/' + $scope.messages[index]._id + '/' + $routeParams.currentTab);
+        }
+      });
+    });
+  };
+
+  $scope.deleteAllMessages = function () {
+    if(confirm("Are you sure you wan't to delete all messages in '" + $scope.$storage.inbox + "'?")){
+      $http.delete("/api/0/messages/").then(function (resp) {
+        $scope.refreshMessages();
+      });
+    }
   };
 
   $scope.isActiveTab = function (tabUrl) {
