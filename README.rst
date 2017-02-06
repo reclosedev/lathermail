@@ -14,6 +14,11 @@ Can store messages in MongoDB or any SQLAlchemy supported DB (e.g., sqlite). Sup
 
 Contains simple UI interface (AngularJS) to navigate and manage received messages.
 
+Available API clients:
+
+    * Python API client `lathermail_client <https://github.com/reclosedev/lathermail_client>`_
+      (`PyPI <https://pypi.python.org/pypi/lathermail_client/>`_).
+
 Usage::
 
     $ virtualenv venv  # or mkvirutalenv lathermail
