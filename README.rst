@@ -12,7 +12,7 @@ SMTP Server with API for email testing inspired by `mailtrap <https://mailtrap.i
 
 Can store messages in MongoDB or any SQLAlchemy supported DB (e.g., sqlite). Supports Python 2.7, 3.4, 3.5, pypy.
 
-
+Contains simple UI interface (AngularJS) to navigate and manage received messages.
 
 Usage::
 
@@ -39,6 +39,7 @@ Usage::
 
 
 It will start SMTP server and API server in single process.
+Also UI interface is available at API port (http://127.0.0.1:5000 by default)
 
 Inboxes are identified by SMTP user/password pairs. lathermail intended to be used in single project environment.
 
