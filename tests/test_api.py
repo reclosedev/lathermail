@@ -47,13 +47,26 @@ class ApiTestCase(BaseTestCase):
         self.assertEquals(msg_count({"subject_contains": "no such message"}), 0)
 
         before_send = utcnow()
-        smtp_send_email("test1@example.com", "test", "me@example.com", "Hello",
+        smtp_send_email("wwwww@wwwww.www", "wwwww", "www@wwwww.www", "wwwwwwww",
                         user=self.inbox, password=self.password, port=self.port)
 
         self.assertEquals(msg_count({"recipients.address": emails[0]}), n)
-        self.assertEquals(msg_count({"recipients.name": "Rcpt1"}), n)
-
         self.assertEquals(msg_count({"recipients.address": "no_such_email@example.com"}), 0)
+        self.assertEquals(msg_count({"recipients.address_contains": emails[0][3:]}), n)
+        self.assertEquals(msg_count({"recipients.address_contains": emails[0][:3]}), n)
+        self.assertEquals(msg_count({"recipients.name": "Rcpt1"}), n)
+        self.assertEquals(msg_count({"recipients.name": "Rcpt"}), 0)
+        self.assertEquals(msg_count({"recipients.name_contains": "Rcpt"}), n)
+        self.assertEquals(msg_count({"sender.name": sender_name}), n)
+        self.assertEquals(msg_count({"sender.name": "unknown"}), 0)
+        self.assertEquals(msg_count({"sender.name": sender_name[0]}), 0)
+        self.assertEquals(msg_count({"sender.name_contains": sender_name[0]}), n)
+        self.assertEquals(msg_count({"sender.name_contains": sender_name[-1]}), n)
+        self.assertEquals(msg_count({"sender.address": sender_addr}), n)
+        self.assertEquals(msg_count({"sender.address": sender_addr[0]}), 0)
+        self.assertEquals(msg_count({"sender.address_contains": sender_addr[0]}), n)
+        self.assertEquals(msg_count({"sender.address_contains": sender_addr[-1]}), n)
+
         now = utcnow()
         self.assertEquals(msg_count({"created_at_lt": before_send}), n)
         self.assertEquals(msg_count({"created_at_gt": before_send}), 1)
@@ -198,6 +211,7 @@ class ApiTestCase(BaseTestCase):
         self.assertEqual(msg["message_raw"], text_body)
         self.assertEqual(msg["recipients_raw"], to)
         self.assertEqual(msg["sender_raw"], sender)
+
 
 def auth(user, password):
     return {"X-Mail-Inbox": user, "X-Mail-Password": password}

@@ -9,7 +9,7 @@ from sqlalchemy import event
 from werkzeug.routing import UnicodeConverter
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from . import ALLOWED_QUERY_FIELDS
+from . import ALLOWED_QUERY_FIELDS, SUFFIX_CONTAINS
 from .. import app
 from ..mail import convert_message_to_dict, expand_message_fields
 from ..utils import utcnow, as_utc
@@ -132,18 +132,25 @@ def _prepare_sql_query(password, inbox=None, fields=None, limit=0, order=True, t
     if fields:
         for field, value in fields.items():
             if field in ALLOWED_QUERY_FIELDS and value is not None:
+                is_contains = False
+                if field.endswith(SUFFIX_CONTAINS):
+                    is_contains = True
+                    field = field[:-len(SUFFIX_CONTAINS)]
+
                 if field.startswith("recipients."):
                     sub_field = field.rsplit(".", 1)[1]
-                    filters.append(getattr(Recipient, sub_field) == value)
+                    attr = getattr(Recipient, sub_field)
                 else:
-                    filters.append(getattr(Message, field) == value)
+                    attr = getattr(Message, field.replace(".", "_"))
+                if is_contains:
+                    filters.append(attr.contains(value))
+                else:
+                    filters.append(attr == value)
 
         if fields.get("created_at_gt") is not None:
             filters.append(Message.created_at > fields["created_at_gt"])
         if fields.get("created_at_lt") is not None:
             filters.append(Message.created_at < fields["created_at_lt"])
-        if fields.get("subject_contains"):
-            filters.append(Message.subject.like("%{0}%".format(fields["subject_contains"])))
 
     query = db.session.query(to_select).join(Recipient).filter(db.and_(*filters))
     if load_recipients:

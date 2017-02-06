@@ -135,15 +135,16 @@ Returns file from message. Works in browsers.
 
 Returns messages according to optional filters:
 
-* `sender.name` - Name of sender
-* `sender.address` - Email of sender
-* `recipients.name` - Name of any of recipients
-* `recipients.address` - Email of any of recipients
-* `subject` - Message subject
-* `subject_contains` - Any part of message subject
-* `created_at_lt` - Filter messages created before this ISO formatted datetime
-* `created_at_gt` - Filter messages created after this ISO formatted datetime
-* `read` - Return only read emails when `True` or unread when `False`. All emails returned by default
+* ``sender.name`` - Name of sender
+* ``sender.address`` - Email of sender
+* ``recipients.name`` - Name of any of recipients
+* ``recipients.address`` - Email of any of recipients
+* ``subject`` - Message subject
+* Add ``_contains`` suffix to any field above to search substring match,
+  e.g.: ``subject_contains``, ``recipients.address_contains``
+* ``created_at_lt`` - Filter messages created before this ISO formatted datetime
+* ``created_at_gt`` - Filter messages created after this ISO formatted datetime
+* ``read`` - Return only read emails when `True` or unread when `False`. All emails returned by default
 
 Example::
 

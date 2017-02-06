@@ -5,7 +5,7 @@ import logging
 
 from flask.ext.pymongo import PyMongo, DESCENDING
 
-from . import ALLOWED_QUERY_FIELDS
+from . import ALLOWED_QUERY_FIELDS, SUFFIX_CONTAINS
 from .. import app
 from ..mail import convert_message_to_dict, expand_message_fields
 from ..utils import utcnow
@@ -68,7 +68,11 @@ def _prepare_query(password, inbox=None, fields=None):
     if fields:
         for field, value in fields.items():
             if field in ALLOWED_QUERY_FIELDS and value is not None:
-                query[field] = value
+                if field.endswith(SUFFIX_CONTAINS):
+                    field = field[:-len(SUFFIX_CONTAINS)]
+                    query[field] = {"$regex": re.escape(value)}
+                else:
+                    query[field] = value
 
         if fields.get("created_at_gt") is not None:
             query["created_at"] = {"$gt": fields["created_at_gt"]}
