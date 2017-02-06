@@ -3,6 +3,11 @@
 Changelog
 ---------
 
+0.4.1 (2017-02-06)
+++++++++++++++++++
+* [UI] Add button to delete single or all messages
+
+
 0.4.0 (2017-02-06)
 ++++++++++++++++++
 * Add ``_contains`` filters
