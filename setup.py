@@ -11,6 +11,7 @@ install_requires = [
     "Flask-SQLAlchemy==2.1",
     "MarkupSafe<=1.1.1",
     "Jinja2<=2.11.2",
+    "itsdangerous<=1.1.0",
 ]
 
 
