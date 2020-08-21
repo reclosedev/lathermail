@@ -72,7 +72,7 @@ class InboxServer(smtpd.SMTPServer, object):
             # we have dict of channels indexed by peers. It's cleaned on channel close()
             self._channel_by_peer[addr] = SMTPChannelWithAuth(self, conn, addr, on_close=self._on_channel_close)
 
-    def process_message(self, peer, mailfrom, rcpttos, data):
+    def process_message(self, peer, mailfrom, rcpttos, data, **kwargs):
         channel = self._channel_by_peer.get(peer)
         if not channel:
             log.error("No channel found for peer %s. Channels dump: %s", peer, self._channel_by_peer)
@@ -80,9 +80,15 @@ class InboxServer(smtpd.SMTPServer, object):
 
         log.info("Storing message: inbox: '%s', from: %r, to: %r, peer: %r",
                  channel.user, mailfrom, rcpttos, peer)
-        message = email.message_from_string(data)
-        return self._handler(to=rcpttos, sender=mailfrom, message=message, body=data,
-                             user=channel.user, password=channel.password)
+        try:
+            data = data.decode("utf-8")
+            message = email.message_from_string(data)
+            return self._handler(
+                to=rcpttos, sender=mailfrom, message=message, body=data,
+                user=channel.user, password=channel.password
+            )
+        except Exception:
+            log.exception("Failed to process message:")
 
     def _on_channel_close(self, peer):
         self._channel_by_peer.pop(peer, None)
