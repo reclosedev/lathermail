@@ -81,7 +81,8 @@ class InboxServer(smtpd.SMTPServer, object):
         log.info("Storing message: inbox: '%s', from: %r, to: %r, peer: %r",
                  channel.user, mailfrom, rcpttos, peer)
         try:
-            data = data.decode("utf-8")
+            if hasattr(data, 'decode'):
+                data = data.decode("utf-8")
             message = email.message_from_string(data)
             return self._handler(
                 to=rcpttos, sender=mailfrom, message=message, body=data,
