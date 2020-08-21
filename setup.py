@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 install_requires = [
-    "Flask==0.10.1",
+    "Flask==1.0",
     "Flask-RESTful==0.2.12",
     "Flask-PyMongo==0.3.0",
     "pymongo==2.7.1",
