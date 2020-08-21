@@ -18,7 +18,7 @@ def read(fname):
 setup(
     name="lathermail",
     url="https://github.com/reclosedev/lathermail/",
-    version="0.4.1",
+    version="0.4.2",
     author="Roman Haritonov",
     description="SMTP Server with API for email testing inspired by mailtrap and maildump",
     author_email="reclosedev@gmail.com",
@@ -38,9 +38,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Server",
