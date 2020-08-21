@@ -9,6 +9,7 @@ install_requires = [
     "python-dateutil==2.2",
     "SQLAlchemy==1.0.9",
     "Flask-SQLAlchemy==2.1",
+    "MarkupSafe<=1.1.1"
 ]
 
 
